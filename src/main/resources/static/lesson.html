@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lesson - LearnHub</title>
+
+    <link rel="stylesheet" href="css/lesson.css">
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+
+            <nav>
+
+                <a href="student-dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="my-courses.html">
+                    My Courses
+                </a>
+
+                <a href="course-catalog.html">
+                    Browse Courses
+                </a>
+
+                <a href="my-assignments.html">
+                    Assignments
+                </a>
+
+                <a href="my-grades.html">
+                    Grades
+                </a>
+
+                <a href="my-quizzes.html">
+                    Quizzes
+                </a>
+
+                <a href="my-progress.html">
+                    My Progress
+                </a>
+
+                <a href="settings.html">
+                    Settings
+                </a>
+
+                <a href="#" class="logout">
+                    Logout
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+
+            <div class="topbar">
+
+                <button
+                    class="back-button"
+                    onclick="goBackToCourse()">
+
+                    ← Back to Course
+
+                </button>
+
+            </div>
+
+
+            <!-- LESSON HEADER -->
+
+            <section class="lesson-header">
+
+                <span class="lesson-label">
+                    LESSON
+                </span>
+
+                <h1 id="lesson-title">
+                    Loading lesson...
+                </h1>
+
+            </section>
+
+
+            <!-- LESSON CONTENT -->
+
+            <section class="lesson-content">
+
+                <div id="lesson-body">
+
+                    <p class="loading">
+                        Loading lesson content...
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- LESSON ACTIONS -->
+
+            <div class="lesson-actions">
+
+                <button
+                    class="complete-button"
+                    onclick="markLessonComplete()">
+
+                    ✓ Mark Lesson Complete
+
+                </button>
+
+            </div>
+
+            <p
+                id="lesson-completion-status"
+                class="lesson-completion-status"
+                role="status"
+                aria-live="polite">
+            </p>
+
+        </main>
+
+    </div>
+
+
+    <script src="js/student.js"></script>
+
+</body>
+
+</html>

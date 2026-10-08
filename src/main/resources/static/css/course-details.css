@@ -1,0 +1,497 @@
+/* ========================================
+   COURSE DETAILS PAGE
+======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+}
+
+
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+
+    background: #111827;
+    color: white;
+
+    padding: 25px 18px;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+}
+
+
+.logo {
+    padding: 0 12px 35px;
+}
+
+
+.logo h2 {
+    font-size: 24px;
+}
+
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+.sidebar nav a {
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    padding: 13px 14px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    transition: 0.2s;
+}
+
+
+.sidebar nav a:hover {
+    background: #2563eb;
+    color: white;
+}
+
+
+.sidebar nav a.logout {
+    margin-top: 25px;
+    color: #fca5a5;
+}
+
+
+.sidebar nav a.logout:hover {
+    background: #dc2626;
+    color: white;
+}
+
+
+/* ========================================
+   MAIN CONTENT
+======================================== */
+
+.main-content {
+    margin-left: 240px;
+
+    width: calc(100% - 240px);
+
+    padding: 35px 45px;
+}
+
+
+/* ========================================
+   TOP BAR
+======================================== */
+
+.topbar {
+    margin-bottom: 25px;
+}
+
+
+.back-button {
+    border: none;
+
+    background: transparent;
+
+    color: #2563eb;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    padding: 8px 0;
+}
+
+
+.back-button:hover {
+    color: #1d4ed8;
+}
+
+
+/* ========================================
+   COURSE HEADER
+======================================== */
+
+.course-header {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    color: white;
+
+    padding: 40px;
+
+    border-radius: 18px;
+
+    margin-bottom: 35px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(37, 99, 235, 0.15);
+}
+
+
+.course-label {
+    font-size: 12px;
+
+    font-weight: bold;
+
+    letter-spacing: 1.5px;
+
+    color: #bfdbfe;
+}
+
+
+.course-header h1 {
+    font-size: 34px;
+
+    margin: 10px 0 12px;
+}
+
+
+.course-header p {
+    color: #dbeafe;
+
+    max-width: 800px;
+
+    line-height: 1.7;
+
+    font-size: 15px;
+}
+
+
+/* ========================================
+   CONTENT SECTION
+======================================== */
+
+.content-section {
+    background: transparent;
+}
+
+
+.section-title {
+    margin-bottom: 20px;
+}
+
+
+.section-title h2 {
+    font-size: 24px;
+
+    margin-bottom: 5px;
+}
+
+
+.section-title p {
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+/* ========================================
+   MODULE LIST
+======================================== */
+
+.module-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+/* ========================================
+   MODULE CARD
+======================================== */
+
+.module-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.04);
+}
+
+
+.module-header {
+    padding: 20px 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.module-header:hover {
+    background: #f8fafc;
+}
+
+
+.module-info h3 {
+    font-size: 18px;
+
+    margin-bottom: 6px;
+}
+
+
+.module-info p {
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.module-number {
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-weight: bold;
+
+    margin-right: 14px;
+
+    flex-shrink: 0;
+}
+
+
+.module-left {
+    display: flex;
+
+    align-items: center;
+}
+
+
+/* ========================================
+   LESSON LIST
+======================================== */
+
+.lesson-list {
+    border-top: 1px solid #e5e7eb;
+
+    display: none;
+}
+
+
+.lesson-list.open {
+    display: block;
+}
+
+
+.lesson-item {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 16px 24px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.lesson-item:last-child {
+    border-bottom: none;
+}
+
+
+.lesson-item:hover {
+    background: #f8fafc;
+}
+
+
+.lesson-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.lesson-icon {
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 14px;
+}
+
+
+.lesson-title {
+    font-size: 14px;
+
+    color: #334155;
+}
+
+
+.lesson-arrow {
+    color: #94a3b8;
+
+    font-size: 18px;
+}
+
+
+/* ========================================
+   LOADING / EMPTY
+======================================== */
+
+.loading,
+.empty-message {
+    background: white;
+
+    padding: 45px;
+
+    text-align: center;
+
+    border-radius: 14px;
+
+    color: #64748b;
+
+    border: 1px solid #e5e7eb;
+}
+
+
+.empty-message h3 {
+    color: #172033;
+
+    margin-bottom: 8px;
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        width: 200px;
+    }
+
+
+    .main-content {
+        margin-left: 200px;
+
+        width: calc(100% - 200px);
+
+        padding: 25px;
+    }
+
+
+    .course-header {
+        padding: 30px;
+    }
+
+
+    .course-header h1 {
+        font-size: 28px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .dashboard {
+        flex-direction: column;
+    }
+
+
+    .sidebar {
+        width: 100%;
+
+        min-height: auto;
+
+        position: relative;
+    }
+
+
+    .main-content {
+        margin-left: 0;
+
+        width: 100%;
+
+        padding: 25px;
+    }
+
+
+    .module-header {
+        padding: 18px;
+    }
+
+
+    .lesson-item {
+        padding: 14px 18px;
+    }
+}
