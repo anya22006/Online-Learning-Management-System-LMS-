@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Grades - LearnHub</title>
+    <link rel="stylesheet" href="css/my-grades.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+            <nav aria-label="Student navigation">
+                <a href="student-dashboard.html">Dashboard</a>
+                <a href="my-courses.html">My Courses</a>
+                <a href="course-catalog.html">Browse Courses</a>
+                <a href="my-assignments.html">Assignments</a>
+                <a class="active" href="my-grades.html" aria-current="page">Grades</a>
+                <a href="my-progress.html">My Progress</a>
+                <a href="settings.html">Settings</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-heading">
+                <div>
+                    <p class="eyebrow">YOUR RESULTS</p>
+                    <h1>My Grades</h1>
+                    <p class="intro">Review marks, instructor feedback, and the status of your submitted assignments.</p>
+                </div>
+                <a class="back-link" href="my-assignments.html">← Assignments</a>
+            </header>
+
+            <section class="summary-grid" aria-label="Grade summary">
+                <article class="summary-card">
+                    <p>Total graded assignments</p>
+                    <strong id="graded-count">—</strong>
+                </article>
+                <article class="summary-card">
+                    <p>Average marks</p>
+                    <strong id="average-marks">—</strong>
+                </article>
+            </section>
+
+            <p id="grade-notice" class="grade-notice" role="status" hidden></p>
+
+            <section id="grade-list" class="grade-list" aria-live="polite">
+                <p class="state-message">Loading your grades…</p>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/grades.js"></script>
+</body>
+</html>
