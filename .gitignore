@@ -1,0 +1,12 @@
+target/
+*.class
+*.jar
+*.war
+.DS_Store
+.idea/
+.vscode/
+*.iml
+apache-maven-3.9.6/
+scratch/
+node_modules/
+.env
