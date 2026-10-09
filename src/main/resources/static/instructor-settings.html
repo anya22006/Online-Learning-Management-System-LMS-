@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Settings | LMS</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="css/instructor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="instructor-dashboard.html" class="nav-item">📊 Dashboard Overview</a>
+            <a href="manage-courses.html" class="nav-item">📚 Manage Courses</a>
+            <a href="create-course.html" class="nav-item">➕ Create Course</a>
+            <a href="create-assignment.html" class="nav-item">📝 Create Quiz & Assignment</a>
+            <a href="grade-submissions.html" class="nav-item">⭐ Grade Submissions</a>
+            <a href="instructor-settings.html" class="nav-item active">⚙️ Settings</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Instructor Settings & Profile</h1>
+            </div>
+            <div class="user-badge">👨‍🏫 Logged in as Instructor (ID: 2)</div>
+        </header>
+
+        <div class="content-body">
+            <div class="card-section" style="max-width: 800px;">
+                <div class="section-header">
+                    <h2>Instructor Profile Details</h2>
+                </div>
+                <p id="profileMessage" style="display:none; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; font-size: 0.95rem;"></p>
+                
+                <form id="instructorProfileForm" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="form-group">
+                        <label for="instructorName" style="font-weight:600; margin-bottom: 6px; display:block;">Full Name</label>
+                        <input type="text" id="instructorName" class="form-control" placeholder="Dr. Sarah Jenkins" required style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instructorEmail" style="font-weight:600; margin-bottom: 6px; display:block;">Email Address</label>
+                        <input type="email" id="instructorEmail" class="form-control" placeholder="sarah.jenkins@lms.com" required style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instructorDepartment" style="font-weight:600; margin-bottom: 6px; display:block;">Department / Field</label>
+                        <input type="text" id="instructorDepartment" class="form-control" placeholder="Computer Science & Engineering" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px;">
+                        <div style="padding: 16px; background:#f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <span style="font-size: 0.85rem; color: #6b7280; font-weight:500;">Role</span>
+                            <div id="instructorRole" style="font-size: 1.1rem; font-weight: 700; color: #4f46e5; margin-top: 4px;">Loading…</div>
+                        </div>
+                        <div style="padding: 16px; background:#f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            <span style="font-size: 0.85rem; color: #6b7280; font-weight:500;">Account Status</span>
+                            <div id="instructorStatus" style="font-size: 1.1rem; font-weight: 700; color: #10b981; margin-top: 4px;">Loading…</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="padding: 12px 28px; font-size: 1rem; cursor:pointer;">Save Profile Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/instructor-settings.js"></script>
+</body>
+</html>

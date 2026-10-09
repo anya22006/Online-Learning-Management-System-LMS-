@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Courses | LMS</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="css/instructor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="instructor-dashboard.html" class="nav-item">📊 Dashboard Overview</a>
+            <a href="manage-courses.html" class="nav-item active">📚 Manage Courses</a>
+            <a href="create-course.html" class="nav-item">➕ Create Course</a>
+            <a href="create-assignment.html" class="nav-item">📝 Create Quiz & Assignment</a>
+            <a href="grade-submissions.html" class="nav-item">⭐ Grade Submissions</a>
+            <a href="instructor-settings.html" class="nav-item">⚙️ Settings</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Manage Courses</h1>
+            </div>
+            <div class="user-badge">👨‍🏫 Logged in as Instructor</div>
+        </header>
+
+        <div class="content-body">
+            <div class="card-section">
+                <div class="section-header">
+                    <h2>Your Courses Directory</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="create-course.html" class="btn btn-primary">+ Create Course</a>
+                        <a href="create-assignment.html" class="btn btn-secondary">+ Add Quiz / Assignment</a>
+                    </div>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Course Title</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courseTableBody">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/instructor.js"></script>
+</body>
+</html>

@@ -1,197 +1,84 @@
-Create database lms;
-use lms;
-CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'instructor', 'student') NOT NULL,
-    status ENUM('active', 'inactive') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NULL
-);
-CREATE TABLE courses (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200) NOT NULL,
+-- MySQL Database Schema for LMS Instructor Module
+CREATE DATABASE IF NOT EXISTS lms_db;
+USE lms_db;
+
+-- 1. Courses Table
+CREATE TABLE IF NOT EXISTS courses (
+    course_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    instructor_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
     description TEXT,
-    instructor_id INT,
-    status ENUM('active', 'inactive') DEFAULT 'active',
+    syllabus TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Lessons Table
+CREATE TABLE IF NOT EXISTS lessons (
+    lesson_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content_url TEXT,
+    lesson_order INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NULL,
-
-    FOREIGN KEY (instructor_id)
-        REFERENCES users(id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 );
-CREATE TABLE enrollments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id INT NOT NULL,
-    course_id INT NOT NULL,
-    progress INT DEFAULT 0,
-    status ENUM('active', 'completed', 'dropped') DEFAULT 'active',
-    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (course_id)
-        REFERENCES courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    UNIQUE (student_id, course_id)
-);
-CREATE TABLE modules (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    module_order INT DEFAULT 1,
+-- 3. Assignments Table
+CREATE TABLE IF NOT EXISTS assignments (
+    assignment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    instructions TEXT,
+    due_date DATETIME NOT NULL,
+    max_score INT NOT NULL DEFAULT 100,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (course_id)
-        REFERENCES courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 );
-CREATE TABLE lessons (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    module_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    content TEXT,
-    lesson_order INT DEFAULT 1,
+
+-- 4. Quizzes Table
+CREATE TABLE IF NOT EXISTS quizzes (
+    quiz_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    course_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    instructions TEXT,
+    time_limit_minutes INT DEFAULT 30,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NULL,
-
-    FOREIGN KEY (module_id)
-        REFERENCES modules(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 );
-CREATE TABLE assignments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT NOT NULL,
-    instructor_id INT,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    due_date DATETIME,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NULL,
 
-    FOREIGN KEY (course_id)
-        REFERENCES courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (instructor_id)
-        REFERENCES users(id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
-);
-CREATE TABLE submissions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    assignment_id INT NOT NULL,
-    student_id INT NOT NULL,
-    submission_file VARCHAR(500),
-    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('submitted', 'graded', 'late') DEFAULT 'submitted',
-    marks DECIMAL(5,2),
-    feedback TEXT,
-
-    FOREIGN KEY (assignment_id)
-        REFERENCES assignments(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-CREATE TABLE quizzes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (course_id)
-        REFERENCES courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-CREATE TABLE questions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    quiz_id INT NOT NULL,
+-- 5. Quiz Questions Table
+CREATE TABLE IF NOT EXISTS quiz_questions (
+    question_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    quiz_id BIGINT NOT NULL,
     question_text TEXT NOT NULL,
-    option_a VARCHAR(500),
-    option_b VARCHAR(500),
-    option_c VARCHAR(500),
-    option_d VARCHAR(500),
-    correct_option CHAR(1) NOT NULL,
-
-    FOREIGN KEY (quiz_id)
-        REFERENCES quizzes(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    option_a VARCHAR(255) NOT NULL,
+    option_b VARCHAR(255) NOT NULL,
+    option_c VARCHAR(255),
+    option_d VARCHAR(255),
+    correct_option VARCHAR(10) NOT NULL,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(quiz_id) ON DELETE CASCADE
 );
-CREATE TABLE quiz_attempts (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    quiz_id INT NOT NULL,
-    student_id INT NOT NULL,
-    score DECIMAL(5,2),
-    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (quiz_id)
-        REFERENCES quizzes(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+-- 6. Submissions Table (Student Module Interop)
+CREATE TABLE IF NOT EXISTS submissions (
+    submission_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    assignment_id BIGINT NOT NULL,
+    student_id BIGINT NOT NULL,
+    student_name VARCHAR(255),
+    content TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE student_progress (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id INT NOT NULL,
-    course_id INT NOT NULL,
-    completed_lessons INT DEFAULT 0,
-    total_lessons INT DEFAULT 0,
-    progress_percentage DECIMAL(5,2) DEFAULT 0,
-    last_accessed TIMESTAMP NULL,
 
-    FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (course_id)
-        REFERENCES courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    UNIQUE (student_id, course_id)
-);
-CREATE TABLE activity_logs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    action VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
-);
-CREATE TABLE settings (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    setting_name VARCHAR(100) NOT NULL UNIQUE,
-    setting_value VARCHAR(500),
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP
+-- 7. Grades Table
+CREATE TABLE IF NOT EXISTS grades (
+    grade_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    submission_id BIGINT NOT NULL UNIQUE,
+    instructor_id BIGINT NOT NULL,
+    score INT NOT NULL,
+    max_score INT NOT NULL,
+    feedback TEXT,
+    graded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (submission_id) REFERENCES submissions(submission_id) ON DELETE CASCADE
 );

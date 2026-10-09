@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard</title>
+
+    <link rel="stylesheet" href="css/student.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>LearnHub</h2>
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <a href="student-dashboard.html" class="menu-item active">
+                <span>🏠</span>
+                Dashboard
+            </a>
+
+            <a href="my-courses.html" class="menu-item">
+                <span>📚</span>
+                My Courses
+            </a>
+
+            <a href="course-catalog.html" class="menu-item">
+                <span>🔍</span>
+                Browse Courses
+            </a>
+
+            <a href="my-assignments.html" class="menu-item">
+                <span>📝</span>
+                Assignments
+            </a>
+
+            <a href="my-grades.html" class="menu-item">
+                <span>📊</span>
+                Grades
+            </a>
+
+            <a href="my-quizzes.html" class="menu-item">
+                <span>🧠</span>
+                Quizzes
+            </a>
+
+            <a href="my-progress.html" class="menu-item">
+                <span>📈</span>
+                My Progress
+            </a>
+
+            <a href="settings.html" class="menu-item">
+                <span>⚙️</span>
+                Settings
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="menu-item logout">
+                <span>🚪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div>
+                <h1>Dashboard</h1>
+                <p>Welcome back, <span id="dashboard-name">Loading profile…</span> 👋</p>
+            </div>
+
+            <div class="profile">
+
+                <div class="notification">
+                    🔔
+                </div>
+
+                <div class="profile-info">
+                    <div id="dashboard-profile-avatar" class="profile-avatar">—</div>
+
+                    <div>
+                        <strong id="dashboard-profile-name">Loading profile…</strong>
+                        <small id="dashboard-profile-role">Loading…</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- WELCOME BANNER -->
+        <section class="welcome-banner">
+
+            <div>
+                <h2>Keep learning, keep growing! 🚀</h2>
+
+                <p>
+                    Continue your courses and complete your pending assignments.
+                </p>
+
+                <button onclick="browseCourses()">
+                    Browse Courses
+                </button>
+            </div>
+
+            <div class="welcome-icon">
+                🎓
+            </div>
+
+        </section>
+
+
+        <!-- STATISTICS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    📚
+                </div>
+
+                <div>
+                    <p>Enrolled Courses</p>
+                    <h2 id="dashboard-enrolled-count">—</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    📝
+                </div>
+
+                <div>
+                    <p>Pending Assignments</p>
+                    <h2>—</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    📈
+                </div>
+
+                <div>
+                    <p>Overall Progress</p>
+                    <h2 id="dashboard-overall-progress">—</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    ⭐
+                </div>
+
+                <div>
+                    <p>Average Grade</p>
+                    <h2>—</h2>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTENT GRID -->
+        <section class="dashboard-grid">
+
+
+            <!-- MY COURSES -->
+            <div class="dashboard-card courses-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>My Courses</h2>
+                        <p>Continue where you left off</p>
+                    </div>
+
+                    <a href="my-courses.html">
+                        View All
+                    </a>
+
+                </div>
+
+
+                <div class="course-list" id="dashboard-course-list" aria-live="polite">
+                    <p class="loading">Loading your courses...</p>
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+            <div class="dashboard-side">
+
+
+                <!-- UPCOMING ASSIGNMENTS -->
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h2>Upcoming</h2>
+                            <p>Assignments</p>
+                        </div>
+
+                        <a href="my-assignments.html">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <p class="dashboard-empty-state">
+                        Open Assignments to view your current assignment list.
+                    </p>
+
+                </div>
+
+
+                <!-- RECENT GRADES -->
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h2>Recent Grades</h2>
+                            <p>Your latest results</p>
+                        </div>
+
+                        <a href="my-grades.html">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    <p class="dashboard-empty-state">
+                        Open Grades to view your submitted and graded work.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RECENT ACTIVITY -->
+        <section class="dashboard-card activity-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h2>Recent Activity</h2>
+                    <p>Your latest learning activity</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity-list">
+
+                <p class="dashboard-empty-state">
+                    No activity summary is available yet.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="js/student.js"></script>
+
+</body>
+</html>

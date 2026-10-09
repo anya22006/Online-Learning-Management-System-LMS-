@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Course Details - LearnHub</title>
+
+    <link rel="stylesheet"
+          href="css/course-details.css">
+
+</head>
+
+
+<body>
+
+    <div class="dashboard">
+
+
+        <!-- =================================
+             SIDEBAR
+        ================================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+
+
+            <nav>
+
+                <a href="student-dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="my-courses.html">
+                    My Courses
+                </a>
+
+                <a href="course-catalog.html">
+                    Browse Courses
+                </a>
+
+                <a href="my-assignments.html">
+                    Assignments
+                </a>
+
+                <a href="my-grades.html">
+                    Grades
+                </a>
+
+                <a href="my-quizzes.html">
+                    Quizzes
+                </a>
+
+                <a href="my-progress.html">
+                    My Progress
+                </a>
+
+                <a href="settings.html">
+                    Settings
+                </a>
+
+                <a href="#"
+                   class="logout">
+                    Logout
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+
+        <!-- =================================
+             MAIN CONTENT
+        ================================== -->
+
+        <main class="main-content">
+
+
+            <!-- TOP BAR -->
+
+            <div class="topbar">
+
+                <button
+                    class="back-button"
+                    onclick="goBackToCourses()">
+
+                    ← Back to My Courses
+
+                </button>
+
+            </div>
+
+
+
+            <!-- COURSE HEADER -->
+
+            <section
+                id="course-header"
+                class="course-header">
+
+                <div>
+
+                    <span class="course-label">
+                        COURSE
+                    </span>
+
+                    <h1 id="course-title">
+                        Loading course...
+                    </h1>
+
+                    <p id="course-description">
+                        Loading course information...
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- COURSE CONTENT -->
+
+            <section class="content-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Course Content
+                    </h2>
+
+                    <p>
+                        Modules and lessons
+                    </p>
+
+                </div>
+
+
+                <!-- MODULES WILL APPEAR HERE -->
+
+                <div
+                    id="module-list"
+                    class="module-list">
+
+                    <p class="loading">
+                        Loading modules...
+                    </p>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+    <script src="js/student.js"></script>
+
+</body>
+
+</html>

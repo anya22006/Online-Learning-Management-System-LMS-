@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Courses - LearnHub</title>
+    <link rel="stylesheet" href="css/course-catalog.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+            <nav>
+                <a href="student-dashboard.html">Dashboard</a>
+                <a href="my-courses.html">My Courses</a>
+                <a href="course-catalog.html" class="active">Browse Courses</a>
+                <a href="my-assignments.html">Assignments</a>
+                <a href="my-grades.html">Grades</a>
+                <a href="my-quizzes.html">Quizzes</a>
+                <a href="my-progress.html">My Progress</a>
+                <a href="settings.html">Settings</a>
+                <a href="#" class="logout">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="topbar">
+                <h1>Browse Courses</h1>
+            </div>
+            <section class="page-header">
+                <h2>Explore active courses</h2>
+                <p>Choose a course to view its modules and lessons.</p>
+            </section>
+            <section id="course-list" class="course-grid" aria-live="polite">
+                <p class="empty-message">Loading courses...</p>
+            </section>
+        </main>
+    </div>
+    <script src="js/student.js"></script>
+</body>
+</html>

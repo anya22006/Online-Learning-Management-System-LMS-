@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Quizzes - LearnHub</title>
+    <link rel="stylesheet" href="css/my-quizzes.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+            <nav aria-label="Student navigation">
+                <a href="student-dashboard.html">Dashboard</a>
+                <a href="my-courses.html">My Courses</a>
+                <a href="course-catalog.html">Browse Courses</a>
+                <a href="my-assignments.html">Assignments</a>
+                <a href="my-grades.html">Grades</a>
+                <a class="active" href="my-quizzes.html" aria-current="page">Quizzes</a>
+                <a href="my-progress.html">My Progress</a>
+                <a href="settings.html">Settings</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-heading">
+                <div>
+                    <p class="eyebrow">CHECK YOUR KNOWLEDGE</p>
+                    <h1>My Quizzes</h1>
+                    <p class="intro">Choose a quiz from one of your enrolled courses and see your result when you submit.</p>
+                </div>
+                <a class="back-link" href="my-courses.html">← My courses</a>
+            </header>
+
+            <section id="quiz-list" class="quiz-list" aria-live="polite">
+                <p class="state-message">Loading your quizzes…</p>
+            </section>
+
+            <section id="quiz-workspace" class="quiz-workspace" aria-live="polite" hidden></section>
+        </main>
+    </div>
+
+    <script src="js/quizzes.js"></script>
+</body>
+</html>

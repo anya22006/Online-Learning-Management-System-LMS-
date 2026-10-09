@@ -1,0 +1,361 @@
+/* ========================================
+   MY PROGRESS PAGE
+======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+
+    background: #f5f7fb;
+
+    color: #172033;
+}
+
+
+.dashboard {
+    display: flex;
+
+    min-height: 100vh;
+}
+
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+.sidebar {
+    width: 240px;
+
+    min-height: 100vh;
+
+    background: #111827;
+
+    color: white;
+
+    padding: 25px 18px;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+}
+
+
+.logo {
+    padding: 0 12px 35px;
+}
+
+
+.logo h2 {
+    font-size: 24px;
+}
+
+
+.sidebar nav {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.sidebar nav a {
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    padding: 13px 14px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    transition: 0.2s;
+}
+
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+    background: #2563eb;
+
+    color: white;
+}
+
+
+.sidebar nav a.logout {
+    margin-top: 25px;
+
+    color: #fca5a5;
+}
+
+
+.sidebar nav a.logout:hover {
+    background: #dc2626;
+
+    color: white;
+}
+
+
+/* ========================================
+   MAIN CONTENT
+======================================== */
+
+.main-content {
+    margin-left: 240px;
+
+    width: calc(100% - 240px);
+
+    padding: 35px 45px;
+}
+
+
+/* ========================================
+   TOP BAR
+======================================== */
+
+.topbar {
+    margin-bottom: 25px;
+}
+
+
+.topbar h1 {
+    font-size: 28px;
+}
+
+
+/* ========================================
+   PAGE HEADER
+======================================== */
+
+.page-header {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    color: white;
+
+    padding: 35px;
+
+    border-radius: 18px;
+
+    margin-bottom: 30px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(37, 99, 235, 0.15);
+}
+
+
+.page-header h2 {
+    font-size: 27px;
+
+    margin-bottom: 8px;
+}
+
+
+.page-header p {
+    color: #dbeafe;
+
+    font-size: 15px;
+}
+
+
+/* ========================================
+   PROGRESS LIST
+======================================== */
+
+.progress-list {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(300px, 1fr)
+        );
+
+    gap: 20px;
+}
+
+
+/* ========================================
+   PROGRESS CARD
+======================================== */
+
+.progress-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.04);
+}
+
+
+.progress-card h3 {
+    font-size: 19px;
+
+    margin-bottom: 20px;
+}
+
+
+.progress-info {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 10px;
+}
+
+
+.progress-info span:first-child {
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+.progress-percentage {
+    font-weight: bold;
+
+    color: #2563eb;
+}
+
+
+/* ========================================
+   PROGRESS BAR
+======================================== */
+
+.progress-bar {
+    width: 100%;
+
+    height: 10px;
+
+    background: #e5e7eb;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+
+.progress-fill {
+    height: 100%;
+
+    background: #2563eb;
+
+    border-radius: 10px;
+
+    transition: width 0.5s ease;
+}
+
+
+/* ========================================
+   LESSON DETAILS
+======================================== */
+
+.lesson-details {
+    margin-top: 18px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* ========================================
+   EMPTY / LOADING
+======================================== */
+
+.loading,
+.empty-message {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+
+    padding: 50px;
+
+    text-align: center;
+
+    color: #64748b;
+}
+
+
+.empty-message h3 {
+    color: #172033;
+
+    margin-bottom: 8px;
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        width: 200px;
+    }
+
+
+    .main-content {
+        margin-left: 200px;
+
+        width: calc(100% - 200px);
+
+        padding: 25px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .dashboard {
+        flex-direction: column;
+    }
+
+
+    .sidebar {
+        width: 100%;
+
+        min-height: auto;
+
+        position: relative;
+    }
+
+
+    .main-content {
+        margin-left: 0;
+
+        width: 100%;
+
+        padding: 25px;
+    }
+
+
+    .progress-list {
+        grid-template-columns: 1fr;
+    }
+}

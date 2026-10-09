@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Courses - LearnHub</title>
+
+    <link rel="stylesheet"
+          href="css/my-courses.css">
+
+</head>
+
+
+<body>
+
+    <div class="dashboard">
+
+
+        <!-- ==============================
+             SIDEBAR
+        =============================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <h2>LearnHub</h2>
+            </div>
+
+
+            <nav>
+
+                <a href="student-dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="my-courses.html"
+                   class="active">
+                    My Courses
+                </a>
+
+                <a href="course-catalog.html">
+                    Browse Courses
+                </a>
+
+                <a href="my-assignments.html">
+                    Assignments
+                </a>
+
+                <a href="my-grades.html">
+                    Grades
+                </a>
+
+                <a href="my-quizzes.html">
+                    Quizzes
+                </a>
+
+                <a href="my-progress.html">
+                    My Progress
+                </a>
+
+                <a href="settings.html">
+                    Settings
+                </a>
+
+                <a href="#"
+                   class="logout">
+                    Logout
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+
+        <!-- ==============================
+             MAIN CONTENT
+        =============================== -->
+
+        <main class="main-content">
+
+
+            <div class="topbar">
+
+                <h1>
+                    My Courses
+                </h1>
+
+            </div>
+
+
+
+            <!-- PAGE HEADER -->
+
+            <section class="page-header">
+
+                <h2>
+                    Your Learning
+                </h2>
+
+                <p>
+                    View the courses you are
+                    currently enrolled in.
+                </p>
+
+            </section>
+
+
+
+            <!-- COURSE LIST -->
+
+            <section
+                id="my-course-list"
+                class="course-grid"
+            >
+
+                <p id="loading-message">
+                    Loading your courses...
+                </p>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="js/student.js"></script>
+
+</body>
+
+</html>

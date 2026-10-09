@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Assignment & Quiz | LMS</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="css/instructor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="instructor-dashboard.html" class="nav-item">📊 Dashboard Overview</a>
+            <a href="manage-courses.html" class="nav-item">📚 Manage Courses</a>
+            <a href="create-course.html" class="nav-item">➕ Create Course</a>
+            <a href="create-assignment.html" class="nav-item active">📝 Create Quiz & Assignment</a>
+            <a href="grade-submissions.html" class="nav-item">⭐ Grade Submissions</a>
+            <a href="instructor-settings.html" class="nav-item">⚙️ Settings</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Create Quiz & Assignment</h1>
+            </div>
+            <div class="user-badge">👨‍🏫 Logged in as Instructor</div>
+        </header>
+
+        <div class="content-body">
+            <!-- Tabs -->
+            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                <button id="btnTabAssignment" class="btn btn-primary" onclick="showTab('assignment')">➕ Create Assignment</button>
+                <button id="btnTabQuiz" class="btn btn-secondary" onclick="showTab('quiz')">❓ Create Quiz</button>
+            </div>
+
+            <!-- Assignment Form -->
+            <div class="card-section" id="sectionAssignment" style="max-width: 800px;">
+                <div class="section-header">
+                    <h2>New Assignment</h2>
+                </div>
+                <form id="createAssignmentForm">
+                    <div class="form-group">
+                        <label for="assignCourseSelect">Select Course</label>
+                        <select id="assignCourseSelect" class="form-control" required>
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assignTitle">Assignment Title</label>
+                        <input type="text" id="assignTitle" class="form-control" placeholder="e.g. Build REST API for LMS Course Management" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assignInstructions">Instructions</label>
+                        <textarea id="assignInstructions" class="form-control" placeholder="Describe the assignment requirements, guidelines, and submission formats..."></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label for="assignDueDate">Due Date</label>
+                            <input type="datetime-local" id="assignDueDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignMaxScore">Maximum Marks</label>
+                            <input type="number" id="assignMaxScore" class="form-control" value="100" min="1" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Publish Assignment</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quiz Form -->
+            <div class="card-section" id="sectionQuiz" style="max-width: 800px; display: none;">
+                <div class="section-header">
+                    <h2>New Quiz</h2>
+                </div>
+                <form id="createQuizForm">
+                    <div class="form-group">
+                        <label for="quizCourseSelect">Select Course</label>
+                        <select id="quizCourseSelect" class="form-control" required>
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quizTitle">Quiz Title</label>
+                        <input type="text" id="quizTitle" class="form-control" placeholder="e.g. Java Fundamentals & OOP Quiz" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quizInstructions">Quiz Instructions</label>
+                        <textarea id="quizInstructions" class="form-control" placeholder="Quiz rules and time limit notes..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quizTimeLimit">Time Limit (Minutes)</label>
+                        <input type="number" id="quizTimeLimit" class="form-control" value="30" min="5" required>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+                    <h3 style="margin-bottom: 16px;">Quiz Questions</h3>
+
+                    <div id="questionsContainer">
+                        <div class="quiz-question-box" style="background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label style="font-weight: 600; font-size: 1.05rem;">Question <span class="q-num">1</span> Text</label>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestionField(this)" style="padding: 4px 10px; font-size: 0.85rem; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;">🗑️ Remove</button>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control q-text" placeholder="e.g. Which keyword is used to inherit a class in Java?" required>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <input type="text" class="form-control q-opt-a" placeholder="Option A (e.g. implements)" required>
+                                <input type="text" class="form-control q-opt-b" placeholder="Option B (e.g. extends)" required>
+                                <input type="text" class="form-control q-opt-c" placeholder="Option C (e.g. import)">
+                                <input type="text" class="form-control q-opt-d" placeholder="Option D (e.g. super)">
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label>Correct Option</label>
+                                <select class="form-control q-correct" required>
+                                    <option value="A">Option A</option>
+                                    <option value="B">Option B</option>
+                                    <option value="C">Option C</option>
+                                    <option value="D">Option D</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 12px; margin-bottom: 24px; display: flex; gap: 12px; align-items: center;">
+                        <button type="button" id="btnAddQuestion" class="btn btn-secondary" onclick="addQuestionField()" style="padding: 10px 18px; display: flex; align-items: center; gap: 6px; background: #334155; color: #fff; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 500;">➕ Add Another Question</button>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Publish Quiz</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Existing Assignments & Quizzes Section -->
+            <div class="card-section" style="margin-top: 32px;">
+                <div class="section-header">
+                    <h2>Active Assessments Directory</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div>
+                        <h3 style="margin-bottom: 16px; color: var(--accent-blue);">Assignments</h3>
+                        <div id="assignmentsListContainer">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 16px; color: var(--accent-indigo);">Quizzes</h3>
+                        <div id="quizzesListContainer">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/instructor.js"></script>
+    <script>
+        function showTab(type) {
+            if (type === 'assignment') {
+                document.getElementById('sectionAssignment').style.display = 'block';
+                document.getElementById('sectionQuiz').style.display = 'none';
+                document.getElementById('btnTabAssignment').className = 'btn btn-primary';
+                document.getElementById('btnTabQuiz').className = 'btn btn-secondary';
+            } else {
+                document.getElementById('sectionAssignment').style.display = 'none';
+                document.getElementById('sectionQuiz').style.display = 'block';
+                document.getElementById('btnTabAssignment').className = 'btn btn-secondary';
+                document.getElementById('btnTabQuiz').className = 'btn btn-primary';
+            }
+        }
+    </script>
+</body>
+</html>
