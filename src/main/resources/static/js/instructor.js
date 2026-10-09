@@ -92,12 +92,12 @@ async function loadCourses() {
                 </td>
                 <td>${new Date(course.createdAt).toLocaleDateString()}</td>
                 <td style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a href="create-assignment.html?courseId=${course.courseId}" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;">+ Quiz/Assignment</a>
+                    <a href="create-assignment.html?courseId=${course.courseId}" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> Quiz/Assignment</a>
                     <button class="btn ${course.status === 'DRAFT' ? 'btn-success' : 'btn-secondary'}" 
                             onclick="toggleStatus(${course.courseId}, '${course.status}')">
-                        ${course.status === 'DRAFT' ? 'Publish' : 'Unpublish'}
+                        ${course.status === 'DRAFT' ? '<i class="fa-solid fa-paper-plane"></i> Publish' : '<i class="fa-solid fa-box-archive"></i> Unpublish'}
                     </button>
-                    <button class="btn btn-danger" onclick="deleteCourse(${course.courseId})">Delete</button>
+                    <button class="btn btn-danger" onclick="deleteCourse(${course.courseId})"><i class="fa-solid fa-trash"></i> Delete</button>
                 </td>
             </tr>
         `).join('');
@@ -182,7 +182,7 @@ function addQuestionField() {
     questionBox.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <label style="font-weight: 600; font-size: 1.05rem;">Question <span class="q-num">${document.querySelectorAll('.quiz-question-box').length + 1}</span> Text</label>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestionField(this)" style="padding: 4px 10px; font-size: 0.85rem; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;">🗑️ Remove</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestionField(this)" style="padding: 4px 10px; font-size: 0.85rem; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-trash"></i> Remove</button>
         </div>
         <div class="form-group">
             <input type="text" class="form-control q-text" placeholder="e.g. Enter question text here..." required>
@@ -358,38 +358,65 @@ async function deleteCourse(courseId) {
     }
 }
 
-// Load Submissions
+// Load Submissions and Quiz Attempts
 async function loadSubmissions() {
     try {
-        const res = await fetch(`${API_BASE}/submissions`);
-        const submissions = await res.json();
+        const [subRes, quizAttemptRes] = await Promise.all([
+            fetch(`${API_BASE}/submissions`),
+            fetch(`${API_BASE}/quiz-attempts`).catch(() => null)
+        ]);
 
-        const pendingElem = document.getElementById('metricPendingSubmissions');
-        if (pendingElem) pendingElem.innerText = submissions.length;
-
-        const tbody = document.getElementById('submissionTableBody');
-        if (!tbody) return;
-
-        if (submissions.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No student submissions available for grading.</td></tr>`;
-            return;
+        const submissions = await subRes.json();
+        let quizAttempts = [];
+        if (quizAttemptRes && quizAttemptRes.ok) {
+            quizAttempts = await quizAttemptRes.json();
         }
 
-        tbody.innerHTML = submissions.map(sub => `
-            <tr>
-                <td>#${sub.submissionId}</td>
-                <td><strong>${escapeHtml(sub.studentName || 'Student')}</strong></td>
-                <td>${escapeHtml(sub.content)}</td>
-                <td>${new Date(sub.submittedAt).toLocaleDateString()}</td>
-                <td>
-                    <button class="btn btn-primary" onclick="openGradeModal(${sub.submissionId}, '${escapeHtml(sub.studentName || 'Student')}')">
-                        Grade Work
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        const pendingElem = document.getElementById('metricPendingSubmissions');
+        if (pendingElem) pendingElem.innerText = submissions.length + quizAttempts.length;
+
+        // Render Assignment Submissions
+        const tbody = document.getElementById('submissionTableBody');
+        if (tbody) {
+            if (submissions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No student submissions available for grading.</td></tr>`;
+            } else {
+                tbody.innerHTML = submissions.map(sub => `
+                    <tr>
+                        <td>#${sub.submissionId}</td>
+                        <td><strong>${escapeHtml(sub.studentName || 'Student')}</strong></td>
+                        <td>${escapeHtml(sub.content)}</td>
+                        <td>${new Date(sub.submittedAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="openGradeModal(${sub.submissionId}, '${escapeHtml(sub.studentName || 'Student')}')">
+                                <i class="fa-solid fa-pen"></i> Grade Work
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render Quiz Attempts
+        const quizTbody = document.getElementById('quizAttemptTableBody');
+        if (quizTbody) {
+            if (quizAttempts.length === 0) {
+                quizTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No student quiz attempts recorded yet.</td></tr>`;
+            } else {
+                quizTbody.innerHTML = quizAttempts.map(attempt => `
+                    <tr>
+                        <td>#${attempt.id}</td>
+                        <td><strong>${escapeHtml(attempt.studentName || 'Student')}</strong></td>
+                        <td>Quiz #${attempt.quizId}</td>
+                        <td><strong style="color: var(--accent-emerald);">${attempt.score}/${attempt.totalQuestions || 5}</strong></td>
+                        <td>${attempt.percentage ? attempt.percentage.toFixed(1) : '100'}%</td>
+                        <td>${new Date(attempt.submittedAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            }
+        }
     } catch (err) {
-        console.error('Failed to load submissions:', err);
+        console.error('Failed to load submissions or quiz attempts:', err);
     }
 }
 

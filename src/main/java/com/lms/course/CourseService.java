@@ -19,7 +19,7 @@ public class CourseService {
             dto.getCategory(),
             dto.getDescription(),
             dto.getSyllabus(),
-            CourseStatus.DRAFT
+            CourseStatus.PUBLISHED
         );
         return courseRepository.save(course);
     }

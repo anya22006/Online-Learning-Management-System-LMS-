@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,5 +54,10 @@ public class StudentCourseController {
                 .filter(e -> e.getCourseId().equals(courseId))
                 .findFirst()
                 .orElseGet(() -> enrollmentRepository.save(new Enrollment(studentId, courseId))));
+    }
+
+    @GetMapping("/progress/{studentId}")
+    public ResponseEntity<List<Map<String, Object>>> getStudentProgress(@PathVariable Long studentId) {
+        return ResponseEntity.ok(new ArrayList<>());
     }
 }

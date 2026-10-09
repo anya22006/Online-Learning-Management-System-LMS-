@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Course | LMS</title>
+    <title>Create Course | LMS Instructor</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/instructor.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -15,12 +16,12 @@
             <div class="brand-text">LMS</div>
         </div>
         <nav class="nav-menu">
-            <a href="instructor-dashboard.html" class="nav-item">📊 Dashboard Overview</a>
-            <a href="manage-courses.html" class="nav-item">📚 Manage Courses</a>
-            <a href="create-course.html" class="nav-item active">➕ Create Course</a>
-            <a href="create-assignment.html" class="nav-item">📝 Create Quiz & Assignment</a>
-            <a href="grade-submissions.html" class="nav-item">⭐ Grade Submissions</a>
-            <a href="instructor-settings.html" class="nav-item">⚙️ Settings</a>
+            <a href="instructor-dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard Overview</a>
+            <a href="manage-courses.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Manage Courses</a>
+            <a href="create-course.html" class="nav-item active"><i class="fa-solid fa-folder-plus"></i> Create Course</a>
+            <a href="create-assignment.html" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Create Quiz & Assignment</a>
+            <a href="grade-submissions.html" class="nav-item"><i class="fa-solid fa-award"></i> Grade Submissions</a>
+            <a href="instructor-settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
         </nav>
     </aside>
 
@@ -29,7 +30,7 @@
             <div class="header-title">
                 <h1>Create New Course</h1>
             </div>
-            <div class="user-badge">👨‍🏫 Logged in as Instructor</div>
+            <div class="user-badge"><i class="fa-solid fa-user-tie"></i> Logged in as Instructor (ID: 2)</div>
         </header>
 
         <div class="content-body">
@@ -39,28 +40,34 @@
                 </div>
                 <form id="createCourseForm">
                     <div class="form-group">
-                        <label for="title">Course Title</label>
-                        <input type="text" id="title" class="form-control" placeholder="e.g. Master Java Spring Boot & Microservices" required>
+                        <label for="courseTitle">Course Title</label>
+                        <input type="text" id="courseTitle" class="form-control" placeholder="e.g. Advanced Java Microservices" required>
                     </div>
 
                     <div class="form-group">
                         <label for="category">Category</label>
-                        <input type="text" id="category" class="form-control" placeholder="e.g. Web Development, Computer Science, Data Science" required>
+                        <select id="category" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Mobile Development">Mobile Development</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Course Description</label>
-                        <textarea id="description" class="form-control" placeholder="Provide a comprehensive summary of what students will learn..."></textarea>
+                        <textarea id="description" class="form-control" rows="4" placeholder="Brief outline of course objectives..." required></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="syllabus">Syllabus / Modules Overview</label>
-                        <textarea id="syllabus" class="form-control" placeholder="Module 1: Introduction&#10;Module 2: REST API Design&#10;Module 3: Database & Security"></textarea>
+                        <label for="syllabus">Course Syllabus / Modules</label>
+                        <textarea id="syllabus" class="form-control" rows="5" placeholder="Module 1: Introduction&#10;Module 2: Core Concepts&#10;Module 3: Project Work" required></textarea>
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 24px;">
-                        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Save Draft Course</button>
-                        <a href="manage-courses.html" class="btn btn-secondary" style="padding: 12px 24px;">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save & Publish Course</button>
+                        <a href="manage-courses.html" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

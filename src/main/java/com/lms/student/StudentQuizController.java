@@ -2,10 +2,7 @@ package com.lms.student;
 
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
-import com.lms.quiz.Quiz;
-import com.lms.quiz.QuizQuestion;
-import com.lms.quiz.QuizQuestionRepository;
-import com.lms.quiz.QuizRepository;
+import com.lms.quiz.*;
 import com.lms.student.dto.StudentQuizDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +23,9 @@ public class StudentQuizController {
 
     @Autowired
     private QuizQuestionRepository quizQuestionRepository;
+
+    @Autowired
+    private QuizAttemptRepository quizAttemptRepository;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -60,10 +60,33 @@ public class StudentQuizController {
 
     @PostMapping("/quiz-attempts")
     public ResponseEntity<Map<String, Object>> submitQuizAttempt(@RequestBody Map<String, Object> payload) {
+        Long quizId = payload.get("quizId") != null ? Long.valueOf(payload.get("quizId").toString()) : 1L;
+        Long studentId = payload.get("studentId") != null ? Long.valueOf(payload.get("studentId").toString()) : 1L;
+        String studentName = payload.get("studentName") != null ? payload.get("studentName").toString() : "Alex Johnson";
+        Integer score = payload.get("score") != null ? Integer.valueOf(payload.get("score").toString()) : 100;
+        Integer totalQuestions = payload.get("totalQuestions") != null ? Integer.valueOf(payload.get("totalQuestions").toString()) : 5;
+        Double percentage = totalQuestions > 0 ? ((double) score / totalQuestions) * 100 : 100.0;
+
+        Long courseId = null;
+        Optional<Quiz> quizOpt = quizRepository.findById(quizId);
+        if (quizOpt.isPresent()) {
+            courseId = quizOpt.get().getCourseId();
+        }
+
+        QuizAttempt attempt = new QuizAttempt(quizId, studentId, studentName, courseId, score, totalQuestions, percentage);
+        QuizAttempt saved = quizAttemptRepository.save(attempt);
+
         return ResponseEntity.ok(Map.of(
                 "status", "success",
                 "message", "Quiz attempt submitted successfully!",
-                "score", 100
+                "attemptId", saved.getId(),
+                "score", saved.getScore(),
+                "percentage", saved.getPercentage()
         ));
+    }
+
+    @GetMapping("/quiz-attempts/{studentId}")
+    public ResponseEntity<List<QuizAttempt>> getStudentQuizAttempts(@PathVariable Long studentId) {
+        return ResponseEntity.ok(quizAttemptRepository.findByStudentId(studentId));
     }
 }

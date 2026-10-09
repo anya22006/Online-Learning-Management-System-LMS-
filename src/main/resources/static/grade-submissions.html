@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade Submissions | LMS</title>
+    <title>Grade Submissions | LMS Instructor</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/instructor.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -15,12 +16,12 @@
             <div class="brand-text">LMS</div>
         </div>
         <nav class="nav-menu">
-            <a href="instructor-dashboard.html" class="nav-item">📊 Dashboard Overview</a>
-            <a href="manage-courses.html" class="nav-item">📚 Manage Courses</a>
-            <a href="create-course.html" class="nav-item">➕ Create Course</a>
-            <a href="create-assignment.html" class="nav-item">📝 Create Quiz & Assignment</a>
-            <a href="grade-submissions.html" class="nav-item active">⭐ Grade Submissions</a>
-            <a href="instructor-settings.html" class="nav-item">⚙️ Settings</a>
+            <a href="instructor-dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard Overview</a>
+            <a href="manage-courses.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Manage Courses</a>
+            <a href="create-course.html" class="nav-item"><i class="fa-solid fa-folder-plus"></i> Create Course</a>
+            <a href="create-assignment.html" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Create Quiz & Assignment</a>
+            <a href="grade-submissions.html" class="nav-item active"><i class="fa-solid fa-award"></i> Grade Submissions</a>
+            <a href="instructor-settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
         </nav>
     </aside>
 
@@ -29,21 +30,21 @@
             <div class="header-title">
                 <h1>Grade Submissions</h1>
             </div>
-            <div class="user-badge">👨‍🏫 Logged in as Instructor</div>
+            <div class="user-badge"><i class="fa-solid fa-user-tie"></i> Logged in as Instructor (ID: 2)</div>
         </header>
 
-        <div class="content-body">
-            <!-- Student Submissions Table -->
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 32px;">
+            <!-- Assignment Submissions List -->
             <div class="card-section">
                 <div class="section-header">
-                    <h2>Student Submissions</h2>
+                    <h2><i class="fa-solid fa-file-pen"></i> Submitted Student Assignments</h2>
                 </div>
                 <table class="custom-table">
                     <thead>
                         <tr>
-                            <th>Submission ID</th>
+                            <th>Sub ID</th>
                             <th>Student Name</th>
-                            <th>Submission Content</th>
+                            <th>Submission Content / Link</th>
                             <th>Submitted Date</th>
                             <th>Action</th>
                         </tr>
@@ -54,32 +55,55 @@
                 </table>
             </div>
 
-            <!-- Grade Form Section (Initially Hidden) -->
-            <div class="card-section" id="gradeSection" style="display: none; max-width: 700px; border-color: var(--accent-blue);">
+            <!-- Quiz Attempts List -->
+            <div class="card-section">
                 <div class="section-header">
-                    <h2>Evaluate Submission for: <span id="modalStudentName" style="color: var(--accent-blue);">Student</span></h2>
+                    <h2><i class="fa-solid fa-brain"></i> Student Quiz Attempts & Results</h2>
                 </div>
-                <form id="gradeForm">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Attempt ID</th>
+                            <th>Student Name</th>
+                            <th>Quiz ID</th>
+                            <th>Score / Total</th>
+                            <th>Percentage</th>
+                            <th>Submitted Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quizAttemptTableBody">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Grade Modal / Panel -->
+            <div class="card-section" id="gradeSection" style="display: none; max-width: 800px; border: 2px solid var(--accent-indigo);">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-pen-nib"></i> Grade Student Work: <span id="modalStudentName" style="color: var(--accent-indigo);"></span></h2>
+                </div>
+                <form id="gradeForm" onsubmit="handleGradeSubmission(event)">
                     <input type="hidden" id="modalSubmissionId">
 
-                    <div class="form-group">
-                        <label for="score">Marks Awarded</label>
-                        <input type="number" id="score" class="form-control" placeholder="e.g. 85" min="0" max="100" required>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label for="score">Score Obtained</label>
+                            <input type="number" id="score" class="form-control" placeholder="e.g. 85" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="maxScore">Maximum Score</label>
+                            <input type="number" id="maxScore" class="form-control" value="100" min="1" required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="maxScore">Maximum Marks</label>
-                        <input type="number" id="maxScore" class="form-control" value="100" required readonly>
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label for="feedback">Instructor Feedback</label>
+                        <textarea id="feedback" class="form-control" rows="4" placeholder="Great job! Good implementation of REST controllers." required></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="feedback">Instructor Feedback & Comments</label>
-                        <textarea id="feedback" class="form-control" placeholder="Provide construct feedback or suggestions for improvement..." required></textarea>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; margin-top: 16px;">
-                        <button type="submit" class="btn btn-success" style="padding: 12px 24px;">Submit Grade & Feedback</button>
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('gradeSection').style.display='none'">Cancel</button>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Submit Grade & Feedback</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('gradeSection').style.display='none';">Cancel</button>
                     </div>
                 </form>
             </div>
