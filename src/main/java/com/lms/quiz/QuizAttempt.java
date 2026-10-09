@@ -28,6 +28,9 @@ public class QuizAttempt {
     @Column(name = "total_questions")
     private Integer totalQuestions;
 
+    @Column(name = "total_marks")
+    private Integer totalMarks = 100;
+
     private Double percentage;
 
     @Column(name = "submitted_at")
@@ -66,6 +69,9 @@ public class QuizAttempt {
 
     public Integer getTotalQuestions() { return totalQuestions; }
     public void setTotalQuestions(Integer totalQuestions) { this.totalQuestions = totalQuestions; }
+
+    public Integer getTotalMarks() { return totalMarks; }
+    public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
 
     public Double getPercentage() { return percentage; }
     public void setPercentage(Double percentage) { this.percentage = percentage; }

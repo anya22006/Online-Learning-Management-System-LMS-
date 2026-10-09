@@ -43,4 +43,33 @@ public class GradeController {
         dto.setSubmissionId(submissionId);
         return ResponseEntity.ok(gradeService.gradeSubmission(instructorId, dto));
     }
+
+    @PostMapping("/quiz-attempts/{attemptId}/grade")
+    public ResponseEntity<QuizAttempt> gradeQuizAttempt(
+            @PathVariable Long attemptId,
+            @RequestBody java.util.Map<String, Object> payload) {
+        return quizAttemptRepository.findById(attemptId).map(attempt -> {
+            if (payload.get("score") != null) {
+                attempt.setScore(Integer.parseInt(payload.get("score").toString()));
+            }
+            if (payload.get("totalMarks") != null) {
+                attempt.setTotalMarks(Integer.parseInt(payload.get("totalMarks").toString()));
+            }
+            if (payload.get("percentage") != null) {
+                attempt.setPercentage(Double.parseDouble(payload.get("percentage").toString()));
+            } else if (attempt.getTotalMarks() != null && attempt.getTotalMarks() > 0 && attempt.getScore() != null) {
+                double pct = ((double) attempt.getScore() / attempt.getTotalMarks()) * 100.0;
+                attempt.setPercentage(Math.round(pct * 10.0) / 10.0);
+            }
+            QuizAttempt updated = quizAttemptRepository.save(attempt);
+            return ResponseEntity.ok(updated);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/quiz-attempts/{attemptId}")
+    public ResponseEntity<QuizAttempt> updateQuizAttempt(
+            @PathVariable Long attemptId,
+            @RequestBody java.util.Map<String, Object> payload) {
+        return gradeQuizAttempt(attemptId, payload);
+    }
 }

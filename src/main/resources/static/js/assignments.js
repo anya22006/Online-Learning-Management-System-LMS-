@@ -29,10 +29,9 @@ function formatDate(value) {
 
 function getStatusClass(status) {
     const normalizedStatus = String(status || "").toLowerCase();
-    return ["submitted", "graded", "reviewed", "late", "rejected"]
-        .includes(normalizedStatus)
-        ? ` status-${normalizedStatus}`
-        : "";
+    if (normalizedStatus.includes("graded")) return " status-graded";
+    if (normalizedStatus.includes("submitted")) return " status-submitted";
+    return " status-not-submitted";
 }
 
 function renderAssignment(assignment) {
@@ -43,53 +42,65 @@ function renderAssignment(assignment) {
     const description = assignment.description
         ? escapeHtml(assignment.description)
         : "No assignment description was provided.";
-    const status = assignment.submissionStatus
-        ? escapeHtml(assignment.submissionStatus)
-        : "Status not set";
+    const rawStatus = assignment.submissionStatus || "Not submitted";
+    const statusText = escapeHtml(rawStatus);
+    const statusClass = getStatusClass(rawStatus);
+
+    let statusIcon = '<i class="fa-solid fa-clock"></i>';
+    if (statusClass.includes("graded")) statusIcon = '<i class="fa-solid fa-award"></i>';
+    else if (statusClass.includes("submitted")) statusIcon = '<i class="fa-solid fa-circle-check"></i>';
+    else if (statusClass.includes("not-submitted")) statusIcon = '<i class="fa-solid fa-circle-exclamation"></i>';
+
     const marks = assignment.marks === null || assignment.marks === undefined
         ? "Not graded"
-        : escapeHtml(assignment.marks);
+        : `${escapeHtml(assignment.marks)} / ${escapeHtml(assignment.maxMarks || 100)} pts`;
+
     const feedback = assignment.feedback
-        ? `<section class="feedback-panel"><h3>Instructor feedback</h3><p>${escapeHtml(assignment.feedback)}</p></section>`
+        ? `
+            <section class="feedback-panel">
+                <h3><i class="fa-solid fa-comment-dots"></i> Instructor Feedback</h3>
+                <p>${escapeHtml(assignment.feedback)}</p>
+            </section>`
         : "";
-    const isNotSubmitted = String(assignment.submissionStatus || "").toLowerCase()
-        === "not submitted";
+
+    const isNotSubmitted = String(rawStatus).toLowerCase() === "not submitted";
+
     const submissionForm = isNotSubmitted
         ? `
             <form class="submission-form" data-assignment-id="${escapeHtml(assignment.assignmentId)}">
                 <label for="submission-${escapeHtml(assignment.assignmentId)}">
-                    Your submission or file reference
+                    <i class="fa-solid fa-pen-to-square"></i> Your Submission or File Link
                 </label>
                 <textarea
                     id="submission-${escapeHtml(assignment.assignmentId)}"
                     name="submissionFile"
                     maxlength="500"
                     required
-                    placeholder="Paste your response or a shareable file link (500 characters maximum)"
+                    placeholder="Type your response or paste a shareable Google Drive / GitHub repository link..."
                 ></textarea>
                 <div class="submission-form-footer">
-                    <span class="submission-limit">Text or link only · up to 500 characters</span>
-                    <button class="submit-button" type="submit">Submit assignment</button>
+                    <span class="submission-limit"><i class="fa-solid fa-circle-info"></i> Text or link only · up to 500 characters</span>
+                    <button class="submit-button" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Assignment</button>
                 </div>
                 <p class="submission-message" role="status" aria-live="polite"></p>
             </form>`
-        : "";
+        : `<p class="submission-notice"><i class="fa-solid fa-circle-check"></i> Submitted on ${escapeHtml(formatDate(assignment.submittedAt))}</p>`;
 
     return `
         <article class="assignment-card" data-assignment-id="${escapeHtml(assignment.assignmentId)}">
             <div class="assignment-topline">
                 <div>
-                    <p class="course-name">${courseName}</p>
+                    <span class="course-name"><i class="fa-solid fa-book"></i> ${courseName}</span>
                     <h2>${title}</h2>
                 </div>
-                <span class="status-badge${getStatusClass(assignment.submissionStatus)}">${status}</span>
+                <span class="status-badge${statusClass}">${statusIcon} ${statusText}</span>
             </div>
-            <p class="assignment-description">${description}</p>
+            <div class="assignment-description">${description}</div>
             <div class="assignment-meta">
-                <span><strong>Due:</strong> ${escapeHtml(formatDate(assignment.dueDate))}</span>
-                <span><strong>Marks:</strong> ${marks}</span>
+                <span><i class="fa-solid fa-calendar-day" style="color: #3b82f6;"></i> <strong>Due:</strong> ${escapeHtml(formatDate(assignment.dueDate))}</span>
+                <span><i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> <strong>Marks:</strong> ${marks}</span>
                 ${assignment.submittedAt
-                    ? `<span><strong>Submitted:</strong> ${escapeHtml(formatDate(assignment.submittedAt))}</span>`
+                    ? `<span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> <strong>Submitted:</strong> ${escapeHtml(formatDate(assignment.submittedAt))}</span>`
                     : ""}
             </div>
             ${feedback}

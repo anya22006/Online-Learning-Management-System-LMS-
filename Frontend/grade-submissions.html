@@ -69,6 +69,7 @@
                             <th>Score / Total</th>
                             <th>Percentage</th>
                             <th>Submitted Date</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="quizAttemptTableBody">
@@ -77,10 +78,10 @@
                 </table>
             </div>
 
-            <!-- Grade Modal / Panel -->
+            <!-- Grade Assignment Modal / Panel -->
             <div class="card-section" id="gradeSection" style="display: none; max-width: 800px; border: 2px solid var(--accent-indigo);">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-pen-nib"></i> Grade Student Work: <span id="modalStudentName" style="color: var(--accent-indigo);"></span></h2>
+                    <h2><i class="fa-solid fa-pen-nib"></i> Grade Student Assignment: <span id="modalStudentName" style="color: var(--accent-indigo);"></span></h2>
                 </div>
                 <form id="gradeForm" onsubmit="handleGradeSubmission(event)">
                     <input type="hidden" id="modalSubmissionId">
@@ -104,6 +105,32 @@
                     <div style="display: flex; gap: 12px; margin-top: 20px;">
                         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Submit Grade & Feedback</button>
                         <button type="button" class="btn btn-secondary" onclick="document.getElementById('gradeSection').style.display='none';">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Edit Quiz Marks Modal / Panel -->
+            <div class="card-section" id="editQuizGradeSection" style="display: none; max-width: 800px; border: 2px solid var(--accent-emerald);">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-pen-to-square"></i> Edit Quiz Marks: <span id="modalQuizStudentName" style="color: var(--accent-emerald);"></span></h2>
+                </div>
+                <form id="editQuizGradeForm" onsubmit="handleEditQuizGradeSubmission(event)">
+                    <input type="hidden" id="modalQuizAttemptId">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label for="editQuizScore">Score Obtained (Earned Marks)</label>
+                            <input type="number" id="editQuizScore" class="form-control" placeholder="e.g. 5" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editQuizTotalMarks">Total Quiz Marks (Max Score)</label>
+                            <input type="number" id="editQuizTotalMarks" class="form-control" placeholder="e.g. 5" min="1" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-success" style="background-color: var(--accent-emerald); border-color: var(--accent-emerald);"><i class="fa-solid fa-check"></i> Save Updated Marks</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editQuizGradeSection').style.display='none';">Cancel</button>
                     </div>
                 </form>
             </div>

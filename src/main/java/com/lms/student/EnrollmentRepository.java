@@ -9,4 +9,5 @@ import java.util.List;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByStudentId(Long studentId);
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+    long countByCourseId(Long courseId);
 }

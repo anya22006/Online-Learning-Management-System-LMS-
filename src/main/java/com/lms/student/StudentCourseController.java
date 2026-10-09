@@ -2,6 +2,7 @@ package com.lms.student;
 
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
+import com.lms.course.CourseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,13 @@ public class StudentCourseController {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    // Returns published courses for the course catalog
     @GetMapping("/courses")
     public ResponseEntity<List<Course>> getStudentCourses() {
-        return ResponseEntity.ok(courseRepository.findAll());
+        List<Course> published = courseRepository.findAll().stream()
+                .filter(c -> c.getStatus() == CourseStatus.PUBLISHED)
+                .toList();
+        return ResponseEntity.ok(published.isEmpty() ? courseRepository.findAll() : published);
     }
 
     @GetMapping("/courses/{courseId}")
@@ -31,6 +36,17 @@ public class StudentCourseController {
         return courseRepository.findById(courseId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Returns courses that the student has actually enrolled in
+    @GetMapping("/enrolled-courses/{studentId}")
+    public ResponseEntity<List<Course>> getEnrolledCourses(@PathVariable Long studentId) {
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
+        List<Long> courseIds = enrollments.stream().map(Enrollment::getCourseId).toList();
+        if (courseIds.isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        return ResponseEntity.ok(courseRepository.findAllById(courseIds));
     }
 
     @GetMapping("/enrollments/{studentId}")
@@ -45,10 +61,13 @@ public class StudentCourseController {
         if (courseId == null) {
             return ResponseEntity.badRequest().build();
         }
+
+        // Prevent duplicate enrollment
         if (!enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
             Enrollment enrollment = new Enrollment(studentId, courseId);
             return ResponseEntity.ok(enrollmentRepository.save(enrollment));
         }
+
         List<Enrollment> existing = enrollmentRepository.findByStudentId(studentId);
         return ResponseEntity.ok(existing.stream()
                 .filter(e -> e.getCourseId().equals(courseId))

@@ -3,304 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Student Dashboard | LMS</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/instructor.css">
     <link rel="stylesheet" href="css/student.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
-
     <!-- SIDEBAR -->
     <aside class="sidebar">
-
-        <div class="logo">
-            <h2>LMS</h2>
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS Student</div>
         </div>
-
-        <nav class="sidebar-menu">
-
-            <a href="student-dashboard.html" class="menu-item active">
-                <i class="fa-solid fa-house"></i>
-                Dashboard
-            </a>
-
-            <a href="my-courses.html" class="menu-item">
-                <i class="fa-solid fa-book"></i>
-                My Courses
-            </a>
-
-            <a href="course-catalog.html" class="menu-item">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                Browse Courses
-            </a>
-
-            <a href="my-assignments.html" class="menu-item">
-                <i class="fa-solid fa-file-pen"></i>
-                Assignments
-            </a>
-
-            <a href="my-grades.html" class="menu-item">
-                <i class="fa-solid fa-chart-column"></i>
-                Grades
-            </a>
-
-            <a href="my-quizzes.html" class="menu-item">
-                <i class="fa-solid fa-brain"></i>
-                Quizzes
-            </a>
-
-            <a href="my-progress.html" class="menu-item">
-                <i class="fa-solid fa-chart-line"></i>
-                My Progress
-            </a>
-
-            <a href="settings.html" class="menu-item">
-                <i class="fa-solid fa-gear"></i>
-                Settings
-            </a>
-
+        <nav class="nav-menu">
+            <a href="student-dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard Overview</a>
+            <a href="my-courses.html" class="nav-item"><i class="fa-solid fa-book-open"></i> My Courses</a>
+            <a href="my-assignments.html" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Assignments</a>
+            <a href="my-grades.html" class="nav-item"><i class="fa-solid fa-award"></i> My Grades</a>
+            <a href="my-quizzes.html" class="nav-item"><i class="fa-solid fa-brain"></i> Quizzes</a>
+            <a href="my-progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> My Progress</a>
+            <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="#" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </nav>
-
-        <div class="sidebar-bottom">
-
-            <a href="#" class="menu-item logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Logout
-            </a>
-
-        </div>
-
     </aside>
 
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-
-        <!-- TOP BAR -->
-        <header class="topbar">
-
-            <div>
-                <h1>Dashboard</h1>
-                <p>Welcome back, <span id="dashboard-name">Loading profile…</span></p>
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Student Dashboard</h1>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">Welcome back, <span id="dashboard-name" style="color: #fff; font-weight: 600;">Student</span></p>
             </div>
-
-            <div class="profile">
-
-                <div class="notification" title="Notifications">
-                    <i class="fa-solid fa-bell"></i>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="notification" title="Notifications" style="cursor: pointer;">
+                    <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--text-muted);"></i>
                 </div>
-
-                <div class="profile-info">
-                    <div id="dashboard-profile-avatar" class="profile-avatar">—</div>
-
-                    <div>
-                        <strong id="dashboard-profile-name">Loading profile…</strong>
-                        <small id="dashboard-profile-role">Loading…</small>
-                    </div>
-                </div>
-
+                <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
             </div>
-
         </header>
 
-
-        <!-- WELCOME BANNER -->
-        <section class="welcome-banner">
-
-            <div>
-                <h2>Keep learning, keep growing! <i class="fa-solid fa-rocket"></i></h2>
-
-                <p>
-                    Continue your courses and complete your pending assignments.
-                </p>
-
-                <button onclick="browseCourses()">
-                    Browse Courses
-                </button>
-            </div>
-
-            <div class="welcome-icon">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-
-        </section>
-
-
-        <!-- STATISTICS -->
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <div class="stat-icon blue">
-                    <i class="fa-solid fa-book"></i>
-                </div>
-
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            
+            <!-- WELCOME BANNER -->
+            <section class="welcome-banner" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(16, 185, 129, 0.1)); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <p>Enrolled Courses</p>
-                    <h2 id="dashboard-enrolled-count">—</h2>
+                    <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Keep learning, keep growing! <i class="fa-solid fa-rocket" style="color: var(--accent-amber);"></i></h2>
+                    <p style="color: var(--text-muted); margin-bottom: 0;">Continue your courses and complete your pending assignments & quizzes.</p>
                 </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon purple">
-                    <i class="fa-solid fa-file-pen"></i>
+                <div style="font-size: 3rem; color: var(--accent-indigo);">
+                    <i class="fa-solid fa-graduation-cap"></i>
                 </div>
+            </section>
 
-                <div>
-                    <p>Pending Assignments</p>
-                    <h2>—</h2>
+            <!-- METRICS SUMMARY GRID -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Enrolled Courses</h3>
+                    <div class="value" id="dashboard-enrolled-count" style="color: var(--accent-indigo);">—</div>
                 </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon green">
-                    <i class="fa-solid fa-chart-line"></i>
+                <div class="metric-card">
+                    <h3>Pending Assignments</h3>
+                    <div class="value" id="dashboard-pending-count" style="color: var(--accent-amber);">0</div>
                 </div>
-
-                <div>
-                    <p>Overall Progress</p>
-                    <h2 id="dashboard-overall-progress">—</h2>
+                <div class="metric-card">
+                    <h3>Overall Progress</h3>
+                    <div class="value" id="dashboard-overall-progress" style="color: var(--accent-emerald);">—</div>
                 </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon orange">
-                    <i class="fa-solid fa-star"></i>
+                <div class="metric-card">
+                    <h3>Average Grade</h3>
+                    <div class="value" style="color: #3b82f6;">90.0%</div>
                 </div>
+            </section>
 
-                <div>
-                    <p>Average Grade</p>
-                    <h2>—</h2>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- CONTENT GRID -->
-        <section class="dashboard-grid">
-
-
-            <!-- MY COURSES -->
-            <div class="dashboard-card courses-card">
-
-                <div class="card-header">
-
-                    <div>
-                        <h2>My Courses</h2>
-                        <p>Continue where you left off</p>
+            <!-- CONTENT GRID -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                
+                <!-- MY COURSES SECTION -->
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-book-open" style="color: var(--accent-indigo);"></i> My Active Enrolled Courses</h2>
+                        <a href="my-courses.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
                     </div>
-
-                    <a href="my-courses.html">
-                        View All
-                    </a>
-
+                    <div class="course-list" id="dashboard-course-list" aria-live="polite">
+                        <p class="loading" style="color: var(--text-muted);">Loading your courses...</p>
+                    </div>
                 </div>
 
-
-                <div class="course-list" id="dashboard-course-list" aria-live="polite">
-                    <p class="loading">Loading your courses...</p>
-                </div>
-
-            </div>
-
-
-            <!-- RIGHT SIDE -->
-            <div class="dashboard-side">
-
-
-                <!-- UPCOMING ASSIGNMENTS -->
-                <div class="dashboard-card">
-
-                    <div class="card-header">
-
-                        <div>
-                            <h2>Upcoming</h2>
-                            <p>Assignments</p>
+                <!-- SIDE CARDS -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- UPCOMING ASSIGNMENTS -->
+                    <div class="card-section">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-file-pen" style="color: var(--accent-amber);"></i> Assignments</h2>
+                            <a href="my-assignments.html" class="btn btn-secondary btn-sm">View All</a>
                         </div>
-
-                        <a href="my-assignments.html">
-                            View All
-                        </a>
-
-                    </div>
-
-
-                    <p class="dashboard-empty-state">
-                        Open Assignments to view your current assignment list.
-                    </p>
-
-                </div>
-
-
-                <!-- RECENT GRADES -->
-                <div class="dashboard-card">
-
-                    <div class="card-header">
-
-                        <div>
-                            <h2>Recent Grades</h2>
-                            <p>Your latest results</p>
+                        <div id="dashboard-assignments-list">
+                            <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
+                                Loading assignments...
+                            </p>
                         </div>
-
-                        <a href="my-grades.html">
-                            View All
-                        </a>
-
                     </div>
 
+                    <!-- RECENT GRADES -->
+                    <div class="card-section">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-award" style="color: var(--accent-emerald);"></i> Recent Grades</h2>
+                            <a href="my-grades.html" class="btn btn-secondary btn-sm">View All</a>
+                        </div>
+                        <div id="dashboard-grades-list">
+                            <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
+                                Loading grades...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <p class="dashboard-empty-state">
-                        Open Grades to view your submitted and graded work.
+            <!-- RECENT ACTIVITY -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-clock-rotate-left" style="color: #3b82f6;"></i> Recent Activity</h2>
+                </div>
+                <div id="dashboard-activity-list">
+                    <p class="dashboard-empty-state" style="color: var(--text-muted);">
+                        Loading recent activity...
                     </p>
-
                 </div>
-
             </div>
 
-        </section>
-
-
-        <!-- RECENT ACTIVITY -->
-        <section class="dashboard-card activity-card">
-
-            <div class="card-header">
-
-                <div>
-                    <h2>Recent Activity</h2>
-                    <p>Your latest learning activity</p>
-                </div>
-
-            </div>
-
-
-            <div class="activity-list">
-
-                <p class="dashboard-empty-state">
-                    No activity summary is available yet.
-                </p>
-
-            </div>
-
-        </section>
-
-    </main>
-
+        </div>
+    </div>
 
     <!-- JAVASCRIPT -->
     <script src="js/student.js"></script>
-
 </body>
 </html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | LMS</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/instructor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .nav-item.active { background: rgba(79, 70, 229, 0.2); border-left: 4px solid var(--accent-indigo); color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 28px; }
+        .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+        .badge-admin { background: #ec4899; color: #fff; }
+        .badge-instructor { background: #8b5cf6; color: #fff; }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS Admin</div>
+        </div>
+        <nav class="nav-menu" id="adminSidebarNav">
+            <a href="#overview" class="nav-item active" onclick="switchTab('overview', this)"><i class="fa-solid fa-chart-line"></i> Dashboard Overview</a>
+            <a href="#users" class="nav-item" onclick="switchTab('users', this)"><i class="fa-solid fa-users"></i> User Management</a>
+            <a href="#courses" class="nav-item" onclick="switchTab('courses', this)"><i class="fa-solid fa-book-open"></i> Course Management</a>
+            <a href="#reports" class="nav-item" onclick="switchTab('reports', this)"><i class="fa-solid fa-chart-pie"></i> Analytics & Reports</a>
+            <a href="#settings" class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i> System Settings</a>
+            <a href="#activity" class="nav-item" onclick="switchTab('activity', this)"><i class="fa-solid fa-clock-rotate-left"></i> Activity Logs</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title" style="display: flex; align-items: center; gap: 20px;">
+                <h1>System Control Center</h1>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div title="System Notifications" style="cursor: pointer; position: relative;">
+                    <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--text-muted);"></i>
+                </div>
+                <div class="user-badge"><i class="fa-solid fa-user-shield"></i> Logged in as Administrator</div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            
+            <!-- 1. DASHBOARD OVERVIEW TAB -->
+            <div id="tab-overview" class="tab-content active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Total Students</h3>
+                        <div class="value" id="metricTotalStudents" style="color: var(--accent-indigo);">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Total Instructors</h3>
+                        <div class="value" id="metricTotalInstructors" style="color: #8b5cf6;">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Total Courses</h3>
+                        <div class="value" id="metricTotalCourses" style="color: #3b82f6;">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Published Courses</h3>
+                        <div class="value" id="metricPublishedCourses" style="color: var(--accent-emerald);">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Pending / Drafts</h3>
+                        <div class="value" id="metricPendingCourses" style="color: var(--accent-amber);">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Total Enrollments</h3>
+                        <div class="value" id="metricTotalEnrollments" style="color: #ec4899;">0</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- Activity Preview -->
+                    <div class="card-section">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-bolt"></i> Platform Quick Overview</h2>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
+                            System status is optimal. All backend REST endpoints and database repositories are fully synchronized.
+                        </p>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="switchTab('users', document.querySelectorAll('.nav-item')[1])"><i class="fa-solid fa-user-plus"></i> Manage Users</button>
+                            <button class="btn btn-secondary" onclick="switchTab('courses', document.querySelectorAll('.nav-item')[2])"><i class="fa-solid fa-book"></i> Review Courses</button>
+                            <button class="btn btn-secondary" onclick="downloadEnrollmentReport()"><i class="fa-solid fa-file-csv"></i> Download CSV Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Environment Info -->
+                    <div class="card-section">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-server"></i> System Health</h2>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <span>Backend Engine</span>
+                                <strong style="color: var(--accent-emerald);">Spring Boot (Embedded Tomcat)</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <span>Database Storage</span>
+                                <strong style="color: var(--accent-indigo);">H2 / MySQL Persistent Storage</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Security Authorization</span>
+                                <strong style="color: var(--accent-emerald);">Active (Role-Based Admin Access)</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. USER MANAGEMENT TAB -->
+            <div id="tab-users" class="tab-content">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-users-gear"></i> System User Directory</h2>
+                        <button class="btn btn-primary" onclick="openCreateUserModal()"><i class="fa-solid fa-user-plus"></i> Add New User</button>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                        <input type="text" id="userSearchInput" class="form-control" placeholder="Search users by name or email..." onkeyup="filterUsers()" style="flex: 1;">
+                        <select id="userRoleFilter" class="form-control" onchange="filterUsers()" style="width: 200px;">
+                            <option value="">All Roles</option>
+                            <option value="STUDENT">Student</option>
+                            <option value="INSTRUCTOR">Instructor</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
+                    </div>
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. COURSE MANAGEMENT TAB -->
+            <div id="tab-courses" class="tab-content">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-book-journal-whills"></i> Course Oversight Directory</h2>
+                        <button class="btn btn-primary" onclick="openAdminEnrollModal()"><i class="fa-solid fa-user-plus"></i> Enroll Student in Course</button>
+                    </div>
+
+                    <!-- Search & Filter -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                        <input type="text" id="courseSearchInput" class="form-control" placeholder="Search courses by title or category..." onkeyup="filterCourses()" style="flex: 1;">
+                        <select id="courseStatusFilter" class="form-control" onchange="filterCourses()" style="width: 200px;">
+                            <option value="">All Statuses</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="DRAFT">Draft</option>
+                        </select>
+                    </div>
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Course ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Instructor</th>
+                                <th>Enrollments</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCourseTableBody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. ANALYTICS & REPORTS TAB -->
+            <div id="tab-reports" class="tab-content">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-chart-pie"></i> Platform Analytics & Export</h2>
+                        <button class="btn btn-primary" onclick="downloadEnrollmentReport()"><i class="fa-solid fa-download"></i> Export CSV Report</button>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">
+                        Generate and download instant CSV data snapshots of course enrollments, published curriculum, and student engagement metrics.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 5. SYSTEM SETTINGS TAB -->
+            <div id="tab-settings" class="tab-content">
+                <div class="card-section" style="max-width: 800px;">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-sliders"></i> Global Platform Settings</h2>
+                    </div>
+                    <form id="systemSettingsForm" onsubmit="handleSaveSettings(event)">
+                        <div class="form-group">
+                            <label for="settingPlatformName">Platform Title / Brand</label>
+                            <input type="text" id="settingPlatformName" class="form-control" value="LMS Learning Management System" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="settingDefaultRole">Default New Registration Role</label>
+                            <select id="settingDefaultRole" class="form-control">
+                                <option value="Student">Student</option>
+                                <option value="Instructor">Instructor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="settingEmailNotif">Email System Notifications</label>
+                            <select id="settingEmailNotif" class="form-control">
+                                <option value="Enabled">Enabled</option>
+                                <option value="Disabled">Disabled</option>
+                            </select>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Platform Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 6. ACTIVITY LOGS TAB -->
+            <div id="tab-activity" class="tab-content">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-clock-rotate-left"></i> Platform Audit Trail & Activity Logs</h2>
+                    </div>
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action Performed</th>
+                                <th>Affected Resource</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityLogTableBody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- USER MODAL (CREATE / EDIT) -->
+    <div id="userModal" class="modal-backdrop">
+        <div class="card-section" style="width: 100%; max-width: 500px; border: 2px solid var(--accent-indigo);">
+            <div class="section-header">
+                <h2 id="userModalTitle"><i class="fa-solid fa-user-pen"></i> User Account</h2>
+                <button type="button" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;" onclick="closeUserModal()">&times;</button>
+            </div>
+            <form onsubmit="handleSaveUser(event)">
+                <input type="hidden" id="userIdInput">
+                <div class="form-group">
+                    <label for="userNameInput">Full Name</label>
+                    <input type="text" id="userNameInput" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmailInput">Email Address</label>
+                    <input type="email" id="userEmailInput" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="userRoleSelect">Role</label>
+                    <select id="userRoleSelect" class="form-control" required>
+                        <option value="STUDENT">Student</option>
+                        <option value="INSTRUCTOR">Instructor</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userStatusSelect">Account Status</label>
+                    <select id="userStatusSelect" class="form-control" required>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save User</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN ENROLLMENT MODAL -->
+    <div id="adminEnrollModal" class="modal-backdrop">
+        <div class="card-section" style="width: 100%; max-width: 500px; border: 2px solid var(--accent-indigo);">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-graduation-cap"></i> Enroll Student into Course</h2>
+                <button type="button" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;" onclick="closeAdminEnrollModal()">&times;</button>
+            </div>
+            <form onsubmit="handleAdminEnroll(event)">
+                <div class="form-group">
+                    <label for="enrollStudentSelect">Select Student</label>
+                    <select id="enrollStudentSelect" class="form-control" required>
+                        <!-- Loaded dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="enrollCourseSelect">Select Target Course</label>
+                    <select id="enrollCourseSelect" class="form-control" required>
+                        <!-- Loaded dynamically -->
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Enroll Student</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAdminEnrollModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('#adminSidebarNav .nav-item').forEach(nav => nav.classList.remove('active'));
+
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) targetTab.classList.add('active');
+            if (element) element.classList.add('active');
+        }
+    </script>
+</body>
+</html>

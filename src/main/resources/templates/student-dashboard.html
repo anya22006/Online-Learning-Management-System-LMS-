@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/instructor.css}" href="/css/instructor.css">
+    <link rel="stylesheet" th:href="@{/css/student.css}" href="/css/student.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS Student</div>
+        </div>
+        <nav class="nav-menu">
+            <a th:href="@{/student/dashboard}" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard Overview</a>
+            <a th:href="@{/student/my-courses}" class="nav-item"><i class="fa-solid fa-book-open"></i> My Courses</a>
+            <a th:href="@{/student/my-assignments}" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Assignments</a>
+            <a th:href="@{/student/my-grades}" class="nav-item"><i class="fa-solid fa-award"></i> My Grades</a>
+            <a th:href="@{/student/my-quizzes}" class="nav-item"><i class="fa-solid fa-brain"></i> Quizzes</a>
+            <a th:href="@{/student/my-progress}" class="nav-item"><i class="fa-solid fa-chart-line"></i> My Progress</a>
+            <a th:href="@{/student/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Student Dashboard</h1>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">Welcome back, <span style="color: #fff; font-weight: 600;" th:text="${student != null ? student.name : 'Alex Johnson'}">Student</span></p>
+            </div>
+            <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
+        </header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <section class="welcome-banner" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(16, 185, 129, 0.1)); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Keep learning, keep growing! <i class="fa-solid fa-rocket" style="color: var(--accent-amber);"></i></h2>
+                    <p style="color: var(--text-muted); margin-bottom: 0;">Continue your courses and complete your pending assignments & quizzes.</p>
+                </div>
+                <div style="font-size: 3rem; color: var(--accent-indigo);">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+            </section>
+
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Enrolled Courses</h3>
+                    <div class="value" style="color: var(--accent-indigo);" th:text="${enrolledCount}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Pending Assignments</h3>
+                    <div class="value" style="color: var(--accent-amber);" th:text="${#lists.size(assignments)}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Overall Progress</h3>
+                    <div class="value" style="color: var(--accent-emerald);">100%</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Average Grade</h3>
+                    <div class="value" style="color: #3b82f6;">95%</div>
+                </div>
+            </section>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-book-open"></i> My Active Enrolled Courses</h2>
+                        <a th:href="@{/student/my-courses}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
+                    </div>
+                    <div class="course-list">
+                        <article class="course-item" th:each="course : ${enrolledCourses}">
+                            <div class="course-info">
+                                <h3 th:text="${course.title}">Course Title</h3>
+                                <p th:text="${course.description}">Course Description</p>
+                                <div class="progress-container">
+                                    <div class="progress-bar"><div class="progress" style="width: 0%;"></div></div>
+                                    <span class="progress-label">0%</span>
+                                </div>
+                            </div>
+                            <button class="continue-btn" type="button"><i class="fa-solid fa-play"></i> Continue</button>
+                        </article>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card-section">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-file-pen"></i> Assignments</h2>
+                            <a th:href="@{/student/my-assignments}" class="btn btn-secondary btn-sm">View All</a>
+                        </div>
+                        <div th:each="a : ${assignments}" style="background: #0f172a; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px; border: 1px solid var(--border-color);">
+                            <strong style="font-size: 14px;" th:text="${a.title}">Assignment Title</strong>
+                            <div style="font-size: 12px; color: var(--text-muted);" th:text="'Max Score: ' + ${a.maxScore} + ' pts'">100 pts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

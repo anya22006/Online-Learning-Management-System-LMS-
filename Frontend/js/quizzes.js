@@ -31,19 +31,26 @@ function renderQuiz(quiz) {
     const courseName = quiz.courseTitle
         ? escapeHtml(quiz.courseTitle)
         : `Course ${escapeHtml(quiz.courseId ?? "unavailable")}`;
+    const timeLimit = quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} Mins` : '30 Mins';
 
     return `
-        <article class="quiz-card">
+        <article class="quiz-card" data-quiz-id="${escapeHtml(quiz.quizId)}">
             <div class="quiz-card-header">
                 <div>
-                    <p class="course-name">${courseName}</p>
+                    <span class="course-name"><i class="fa-solid fa-graduation-cap"></i> ${courseName}</span>
                     <h2>${escapeHtml(quiz.title || "Untitled quiz")}</h2>
                 </div>
             </div>
-            <p class="quiz-description">${escapeHtml(quiz.description || "No description provided.")}</p>
-            <button class="primary-button start-quiz" type="button" data-quiz-id="${escapeHtml(quiz.quizId)}">
-                Start quiz
-            </button>
+            <div class="quiz-description">${escapeHtml(quiz.description || "No description provided.")}</div>
+            <div class="quiz-meta">
+                <span><i class="fa-solid fa-clock" style="color: #3b82f6;"></i> <strong>Time Limit:</strong> ${escapeHtml(timeLimit)}</span>
+                <span><i class="fa-solid fa-circle-question" style="color: #10b981;"></i> <strong>Format:</strong> Multiple Choice</span>
+            </div>
+            <div>
+                <button class="primary-button start-quiz" type="button" data-quiz-id="${escapeHtml(quiz.quizId)}">
+                    <i class="fa-solid fa-play"></i> Start Quiz
+                </button>
+            </div>
         </article>`;
 }
 
@@ -55,14 +62,16 @@ function renderQuestion(question, questionNumber) {
         ["D", question.optionD]
     ].filter(([, value]) => value !== null && value !== undefined && value !== "");
 
+    const marksLabel = question.marks ? ` (${question.marks} pts)` : "";
+
     return `
         <fieldset class="question-card">
             <legend class="visually-hidden">Question ${questionNumber}</legend>
-            <h3>${questionNumber}. ${escapeHtml(question.questionText)}</h3>
+            <h3>${questionNumber}. ${escapeHtml(question.questionText)}<span style="font-size: 0.85rem; color: #3b82f6; margin-left: 8px;">${marksLabel}</span></h3>
             <div class="answer-options">
                 ${options.map(([letter, text]) => `
                     <label class="answer-option">
-                        <input type="radio" name="question-${escapeHtml(question.id)}" value="${letter}">
+                        <input type="radio" name="question-${escapeHtml(question.questionId || question.id)}" value="${letter}">
                         <span><strong>${letter}.</strong> ${escapeHtml(text)}</span>
                     </label>
                 `).join("")}

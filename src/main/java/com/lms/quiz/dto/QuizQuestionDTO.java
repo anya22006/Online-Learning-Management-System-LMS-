@@ -7,6 +7,8 @@ public class QuizQuestionDTO {
     private String optionC;
     private String optionD;
     private String correctOption;
+    private Integer marks;
+    private String questionType;
 
     public QuizQuestionDTO() {}
 
@@ -27,4 +29,10 @@ public class QuizQuestionDTO {
 
     public String getCorrectOption() { return correctOption; }
     public void setCorrectOption(String correctOption) { this.correctOption = correctOption; }
+
+    public Integer getMarks() { return marks; }
+    public void setMarks(Integer marks) { this.marks = marks; }
+
+    public String getQuestionType() { return questionType; }
+    public void setQuestionType(String questionType) { this.questionType = questionType; }
 }

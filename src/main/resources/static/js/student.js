@@ -96,9 +96,14 @@ function createCourseCard(course, progress, listType) {
     const title = document.createElement("h3");
     title.textContent = course.title || "Untitled course";
 
+    const rawDesc = course.description || "No description available.";
+    const maxDescLen = 110;
+    const shortDesc = rawDesc.length > maxDescLen 
+        ? rawDesc.substring(0, maxDescLen).trim() + "..." 
+        : rawDesc;
+
     const description = document.createElement("p");
-    description.textContent =
-        course.description || "No description available.";
+    description.textContent = shortDesc;
 
     const courseProgress = Math.max(
         0,
@@ -120,6 +125,7 @@ function createCourseCard(course, progress, listType) {
         progressBar.appendChild(progressFill);
 
         const progressLabel = document.createElement("span");
+        progressLabel.className = "progress-label";
         progressLabel.textContent = `${courseProgress}%`;
         progressContainer.append(progressBar, progressLabel);
         info.appendChild(progressContainer);
@@ -127,9 +133,9 @@ function createCourseCard(course, progress, listType) {
         const button = document.createElement("button");
         button.className = "continue-btn";
         button.type = "button";
-        button.textContent = "Continue";
+        button.innerHTML = '<i class="fa-solid fa-play"></i> Continue';
         button.addEventListener("click", () =>
-            continueCourse(course.title, course.id)
+            continueCourse(course.title, course.courseId || course.id)
         );
 
         card.append(info, button);
@@ -147,9 +153,9 @@ function createCourseCard(course, progress, listType) {
         const progressContainer = document.createElement("div");
         progressContainer.className = "progress-container";
         progressContainer.innerHTML = `
-            <div class="progress-label">
+            <div class="progress-label" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 4px;">
                 <span>Progress</span>
-                <span>${courseProgress}%</span>
+                <span style="color: var(--accent-emerald); font-weight: 600;">${courseProgress}%</span>
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: ${courseProgress}%"></div>
@@ -158,12 +164,13 @@ function createCourseCard(course, progress, listType) {
     }
 
     const button = document.createElement("button");
+    button.className = "continue-btn";
     button.type = "button";
-    button.textContent = listType === "catalog"
-        ? "View Course"
-        : "Continue Learning";
+    button.innerHTML = listType === "catalog"
+        ? '<i class="fa-solid fa-eye"></i> View Course'
+        : '<i class="fa-solid fa-book-reader"></i> Continue Learning';
     button.addEventListener("click", () =>
-        continueCourse(course.title, course.id)
+        continueCourse(course.title, course.courseId || course.id)
     );
     card.appendChild(button);
 
@@ -222,11 +229,11 @@ async function loadDashboard() {
         } else {
             enrollments.forEach(enrollment => {
                 const course = courses.find(item =>
-                    Number(item.id) === Number(enrollment.courseId)
+                    Number(item.courseId || item.id) === Number(enrollment.courseId)
                 );
                 if (course) {
                     const courseProgress = progressRecords.find(record =>
-                        Number(record.courseId) === Number(course.id)
+                        Number(record.courseId) === Number(course.courseId || course.id)
                     );
                     courseList.appendChild(
                         createCourseCard(course, courseProgress, "dashboard")
@@ -502,7 +509,7 @@ async function loadMyCourses() {
 
         enrollments.forEach(enrollment => {
             const course = courses.find(item =>
-                Number(item.id) === Number(enrollment.courseId)
+                Number(item.courseId || item.id) === Number(enrollment.courseId)
             );
 
             if (!course) {
@@ -510,7 +517,7 @@ async function loadMyCourses() {
             }
 
             const courseProgress = progressRecords.find(item =>
-                Number(item.courseId) === Number(course.id)
+                Number(item.courseId) === Number(course.courseId || course.id)
             );
             courseList.appendChild(
                 createCourseCard(course, courseProgress, "enrolled")
@@ -632,7 +639,7 @@ async function loadCourseDetails() {
                 function(item) {
 
                     return (
-                        String(item.id) ===
+                        String(item.courseId || item.id) ===
                         String(courseId)
                     );
 
@@ -1369,7 +1376,7 @@ async function loadMyProgress() {
                         function(item) {
 
                             return (
-                                item.id ===
+                                (item.courseId || item.id) ===
                                 progress.courseId
                             );
 

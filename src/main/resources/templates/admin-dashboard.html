@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/instructor.css}" href="/css/instructor.css">
+    <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">A</div>
+            <div class="brand-text">LMS Admin</div>
+        </div>
+        <nav class="nav-menu">
+            <a th:href="@{/admin/dashboard}" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+            <a th:href="@{/instructor/dashboard}" class="nav-item"><i class="fa-solid fa-user-tie"></i> Instructor Module</a>
+            <a th:href="@{/student/dashboard}" class="nav-item"><i class="fa-solid fa-graduation-cap"></i> Student Module</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>Admin Command Center</h1>
+            </div>
+            <div class="user-badge"><i class="fa-solid fa-user-shield"></i> Logged in as System Admin</div>
+        </header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Students</h3>
+                    <div class="value" th:text="${totalStudents}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Instructors</h3>
+                    <div class="value" style="color: #3b82f6;" th:text="${totalInstructors}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Courses</h3>
+                    <div class="value" style="color: var(--accent-indigo);" th:text="${totalCourses}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Published Courses</h3>
+                    <div class="value" style="color: var(--accent-emerald);" th:text="${publishedCourses}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Pending Drafts</h3>
+                    <div class="value" style="color: var(--accent-amber);" th:text="${pendingCourses}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Enrollments</h3>
+                    <div class="value" style="color: #8b5cf6;" th:text="${totalEnrollments}">0</div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-users"></i> Platform Users</h2>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="'#' + ${user.id}">#1</td>
+                            <td th:text="${user.name}">John Doe</td>
+                            <td th:text="${user.email}">john@lms.com</td>
+                            <td>
+                                <span class="badge" th:classappend="${user.role == 'ADMIN' ? 'badge-published' : 'badge-draft'}" th:text="${user.role}">STUDENT</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-published" th:text="${user.status}">ACTIVE</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/users/delete}" method="post" style="display:inline;">
+                                    <input type="hidden" name="role" th:value="${user.role}">
+                                    <input type="hidden" name="id" th:value="${user.id}">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete user?');"><i class="fa-solid fa-trash"></i> Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Courses Table -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-book-open"></i> Platform Courses</h2>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Course Title</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Enrollments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${courses}">
+                            <td th:text="'#' + ${c.courseId}">#1</td>
+                            <td th:text="${c.title}">Course Title</td>
+                            <td th:text="${c.category}">Computer Science</td>
+                            <td>
+                                <span class="badge" th:classappend="${c.status == 'PUBLISHED' ? 'badge-published' : 'badge-draft'}" th:text="${c.status}">PUBLISHED</span>
+                            </td>
+                            <td th:text="${c.enrollmentCount} + ' Students'">0 Students</td>
+                            <td>
+                                <form th:action="@{/admin/courses/toggle-status}" method="post" style="display:inline;">
+                                    <input type="hidden" name="courseId" th:value="${c.courseId}">
+                                    <input type="hidden" name="status" th:value="${c.status == 'DRAFT' ? 'PUBLISHED' : 'DRAFT'}">
+                                    <button type="submit" class="btn btn-secondary btn-sm" th:text="${c.status == 'DRAFT' ? 'Publish' : 'Unpublish'}">Toggle</button>
+                                </form>
+                                <form th:action="@{/admin/courses/delete}" method="post" style="display:inline;">
+                                    <input type="hidden" name="courseId" th:value="${c.courseId}">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete course?');"><i class="fa-solid fa-trash"></i> Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

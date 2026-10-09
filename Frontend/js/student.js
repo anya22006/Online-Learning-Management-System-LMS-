@@ -93,12 +93,12 @@ function createCourseCard(course, progress, listType) {
         ? "course-item"
         : "course-card";
 
-    const title = document.createElement("h3");
-    title.textContent = course.title || "Untitled course";
-
-    const description = document.createElement("p");
-    description.textContent =
-        course.description || "No description available.";
+    const titleText = course.title || "Untitled course";
+    const rawDesc = course.description || "No description available.";
+    const maxDescLen = 110;
+    const shortDesc = rawDesc.length > maxDescLen 
+        ? rawDesc.substring(0, maxDescLen).trim() + "..." 
+        : rawDesc;
 
     const courseProgress = Math.max(
         0,
@@ -106,67 +106,54 @@ function createCourseCard(course, progress, listType) {
     );
 
     if (listType === "dashboard") {
-        const info = document.createElement("div");
-        info.className = "course-info";
-        info.append(title, description);
-
-        const progressContainer = document.createElement("div");
-        progressContainer.className = "progress-container";
-        const progressBar = document.createElement("div");
-        progressBar.className = "progress-bar";
-        const progressFill = document.createElement("div");
-        progressFill.className = "progress";
-        progressFill.style.width = `${courseProgress}%`;
-        progressBar.appendChild(progressFill);
-
-        const progressLabel = document.createElement("span");
-        progressLabel.textContent = `${courseProgress}%`;
-        progressContainer.append(progressBar, progressLabel);
-        info.appendChild(progressContainer);
-
-        const button = document.createElement("button");
-        button.className = "continue-btn";
-        button.type = "button";
-        button.textContent = "Continue";
-        button.addEventListener("click", () =>
-            continueCourse(course.title, course.id)
-        );
-
-        card.append(info, button);
+        card.style.cssText = "display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 18px 20px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; transition: all 0.2s ease;";
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                <div style="flex: 1; min-width: 0;">
+                    <h3 style="font-size: 1.05rem; font-weight: 600; color: #f8fafc; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-book-open" style="color: #6366f1;"></i>
+                        <span>${escapeHtml(titleText)}</span>
+                    </h3>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin: 0; line-height: 1.45;">${escapeHtml(shortDesc)}</p>
+                </div>
+                <span class="badge badge-published" style="white-space: nowrap; font-size: 11px;">${escapeHtml(course.category || 'Course')}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 1px solid #1e293b; padding-top: 12px; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 280px;">
+                    <div class="progress-bar" style="margin: 0; flex: 1; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #334155;">
+                        <div class="progress-fill" style="width: ${courseProgress}%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981);"></div>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #10b981; min-width: 40px;">${courseProgress}%</span>
+                </div>
+                <button class="continue-btn" type="button" onclick="continueCourse('${escapeHtml(titleText).replace(/'/g, "\\'")}', ${course.courseId || course.id})">
+                    <i class="fa-solid fa-play"></i> Continue Learning
+                </button>
+            </div>
+        `;
         return card;
     }
 
-    card.append(title, description);
-
-    if (listType === "catalog") {
-        const status = document.createElement("span");
-        status.className = "course-status";
-        status.textContent = course.status || "Active";
-        card.appendChild(status);
-    } else {
-        const progressContainer = document.createElement("div");
-        progressContainer.className = "progress-container";
-        progressContainer.innerHTML = `
-            <div class="progress-label">
-                <span>Progress</span>
-                <span>${courseProgress}%</span>
+    card.innerHTML = `
+        <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between; gap: 14px;">
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 8px;">${escapeHtml(titleText)}</h3>
+                <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4;">${escapeHtml(shortDesc)}</p>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${courseProgress}%"></div>
-            </div>`;
-        card.appendChild(progressContainer);
-    }
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = listType === "catalog"
-        ? "View Course"
-        : "Continue Learning";
-    button.addEventListener("click", () =>
-        continueCourse(course.title, course.id)
-    );
-    card.appendChild(button);
-
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                    <span style="color: #94a3b8;">Progress</span>
+                    <span style="color: #10b981; font-weight: 600;">${courseProgress}%</span>
+                </div>
+                <div class="progress-bar" style="margin-bottom: 14px; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; border: 1px solid #334155;">
+                    <div class="progress-fill" style="width: ${courseProgress}%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981);"></div>
+                </div>
+                <button class="continue-btn" style="width: 100%; justify-content: center;" type="button" onclick="continueCourse('${escapeHtml(titleText).replace(/'/g, "\\'")}', ${course.courseId || course.id})">
+                    <i class="fa-solid fa-book-reader"></i> ${listType === 'catalog' ? 'View Course' : 'Continue Learning'}
+                </button>
+            </div>
+        </div>
+    `;
     return card;
 }
 
@@ -222,17 +209,134 @@ async function loadDashboard() {
         } else {
             enrollments.forEach(enrollment => {
                 const course = courses.find(item =>
-                    Number(item.id) === Number(enrollment.courseId)
+                    Number(item.courseId || item.id) === Number(enrollment.courseId)
                 );
                 if (course) {
                     const courseProgress = progressRecords.find(record =>
-                        Number(record.courseId) === Number(course.id)
+                        Number(record.courseId) === Number(course.courseId || course.id)
                     );
                     courseList.appendChild(
                         createCourseCard(course, courseProgress, "dashboard")
                     );
                 }
             });
+        }
+
+        // Load side cards data (Assignments, Quiz attempts)
+        try {
+            const [assignRes, quizAttemptRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/assignments`).catch(() => null),
+                fetch(`${API_BASE_URL}/quiz-attempts/${STUDENT_ID}`).catch(() => null)
+            ]);
+
+            const assignments = assignRes && assignRes.ok ? await assignRes.json() : [];
+            const quizAttempts = quizAttemptRes && quizAttemptRes.ok ? await quizAttemptRes.json() : [];
+
+            const pendingCountElem = document.getElementById("dashboard-pending-count");
+            if (pendingCountElem) {
+                pendingCountElem.textContent = String(assignments.length);
+            }
+
+            // Populate Assignments Widget
+            const assignWidget = document.getElementById("dashboard-assignments-list");
+            if (assignWidget) {
+                if (assignments.length === 0) {
+                    assignWidget.innerHTML = `<p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.9rem;">No pending assignments.</p>`;
+                } else {
+                    assignWidget.innerHTML = assignments.slice(0, 3).map(a => `
+                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                                <i class="fa-solid fa-file-pen"></i>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(a.title)}</div>
+                                <div style="font-size: 0.78rem; color: #94a3b8;">Max Score: ${a.maxScore || 100} pts</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Populate Recent Grades Widget
+            const gradesWidget = document.getElementById("dashboard-grades-list");
+            if (gradesWidget) {
+                if (quizAttempts.length === 0) {
+                    gradesWidget.innerHTML = `<p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.9rem;">No grades recorded yet.</p>`;
+                } else {
+                    gradesWidget.innerHTML = quizAttempts.slice(0, 3).map(q => {
+                        let totalM = q.totalMarks || (q.totalQuestions ? q.totalQuestions * 5 : 5);
+                        if (q.score > totalM) totalM = 100;
+                        let pct = q.percentage != null ? q.percentage : ((q.score / totalM) * 100);
+                        return `
+                            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                                        <i class="fa-solid fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.9rem; color: #f8fafc;">Quiz #${q.quizId}</div>
+                                        <div style="font-size: 0.78rem; color: #94a3b8;">Score: ${q.score}/${totalM}</div>
+                                    </div>
+                                </div>
+                                <span style="font-weight: 700; font-size: 0.9rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 6px;">${pct.toFixed(1)}%</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Populate Activity List Widget
+            const activityWidget = document.getElementById("dashboard-activity-list");
+            if (activityWidget) {
+                const activities = [];
+                if (quizAttempts.length > 0) {
+                    quizAttempts.slice(0, 2).forEach(att => {
+                        activities.push({
+                            icon: 'fa-brain',
+                            color: '#10b981',
+                            bg: 'rgba(16, 185, 129, 0.15)',
+                            title: `Completed Quiz #${att.quizId}`,
+                            subtitle: `Scored ${att.score} points (${att.percentage != null ? att.percentage.toFixed(1) : 100}%)`,
+                            date: new Date(att.submittedAt).toLocaleDateString()
+                        });
+                    });
+                }
+                if (enrollments.length > 0) {
+                    enrollments.slice(0, 2).forEach(enr => {
+                        const courseObj = courses.find(c => Number(c.courseId || c.id) === Number(enr.courseId));
+                        activities.push({
+                            icon: 'fa-book-open',
+                            color: '#6366f1',
+                            bg: 'rgba(99, 102, 241, 0.15)',
+                            title: `Enrolled in ${courseObj ? courseObj.title : 'Course #' + enr.courseId}`,
+                            subtitle: 'Course curriculum unlocked',
+                            date: new Date(enr.enrolledAt || Date.now()).toLocaleDateString()
+                        });
+                    });
+                }
+
+                if (activities.length === 0) {
+                    activityWidget.innerHTML = `<p class="dashboard-empty-state" style="color: var(--text-muted);">No activity recorded yet.</p>`;
+                } else {
+                    activityWidget.innerHTML = `<div style="display: flex; flex-direction: column; gap: 10px;">` + activities.map(act => `
+                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 36px; height: 36px; border-radius: 8px; background: ${act.bg}; color: ${act.color}; display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                                    <i class="fa-solid ${act.icon}"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #f8fafc;">${escapeHtml(act.title)}</div>
+                                    <div style="font-size: 0.8rem; color: #94a3b8;">${escapeHtml(act.subtitle)}</div>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.8rem; color: #64748b;">${act.date}</span>
+                        </div>
+                    `).join('') + `</div>`;
+                }
+            }
+
+        } catch (widgetErr) {
+            console.error("Error loading dashboard widgets:", widgetErr);
         }
 
         const trackedRecords = progressRecords.filter(record =>
@@ -251,7 +355,7 @@ async function loadDashboard() {
             ? `${Math.min(100, Math.round(
                 completedLessons / totalLessons * 100
             ))}%`
-            : "—";
+            : "0%";
     } catch (error) {
         console.error("Error loading dashboard:", error);
         enrolledCount.textContent = "—";
@@ -502,7 +606,7 @@ async function loadMyCourses() {
 
         enrollments.forEach(enrollment => {
             const course = courses.find(item =>
-                Number(item.id) === Number(enrollment.courseId)
+                Number(item.courseId || item.id) === Number(enrollment.courseId)
             );
 
             if (!course) {
@@ -510,7 +614,7 @@ async function loadMyCourses() {
             }
 
             const courseProgress = progressRecords.find(item =>
-                Number(item.courseId) === Number(course.id)
+                Number(item.courseId) === Number(course.courseId || course.id)
             );
             courseList.appendChild(
                 createCourseCard(course, courseProgress, "enrolled")
@@ -632,7 +736,7 @@ async function loadCourseDetails() {
                 function(item) {
 
                     return (
-                        String(item.id) ===
+                        String(item.courseId || item.id) ===
                         String(courseId)
                     );
 
@@ -1369,7 +1473,7 @@ async function loadMyProgress() {
                         function(item) {
 
                             return (
-                                item.id ===
+                                (item.courseId || item.id) ===
                                 progress.courseId
                             );
 

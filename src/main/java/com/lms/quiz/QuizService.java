@@ -7,6 +7,8 @@ import com.lms.quiz.dto.QuizRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -21,6 +23,7 @@ public class QuizService {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Transactional
     public Quiz createQuiz(Long instructorId, QuizRequestDTO dto) {
         Course course = courseRepository.findById(dto.getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("Course not found with ID: " + dto.getCourseId()));
@@ -33,7 +36,8 @@ public class QuizService {
                 dto.getCourseId(),
                 dto.getTitle(),
                 dto.getInstructions(),
-                dto.getTimeLimitMinutes() != null ? dto.getTimeLimitMinutes() : 30
+                dto.getTimeLimitMinutes() != null ? dto.getTimeLimitMinutes() : 30,
+                dto.getTotalMarks() != null ? dto.getTotalMarks() : 100
         );
 
         Quiz savedQuiz = quizRepository.save(quiz);
@@ -47,7 +51,9 @@ public class QuizService {
                         qDto.getOptionB(),
                         qDto.getOptionC(),
                         qDto.getOptionD(),
-                        qDto.getCorrectOption()
+                        qDto.getCorrectOption(),
+                        qDto.getMarks() != null ? qDto.getMarks() : 5,
+                        qDto.getQuestionType() != null ? qDto.getQuestionType() : "MULTIPLE_CHOICE"
                 );
                 quizQuestionRepository.save(question);
             }
@@ -66,5 +72,11 @@ public class QuizService {
 
     public List<QuizQuestion> getQuestionsForQuiz(Long quizId) {
         return quizQuestionRepository.findByQuizId(quizId);
+    }
+
+    @Transactional
+    public void deleteQuiz(Long quizId) {
+        quizQuestionRepository.deleteByQuizId(quizId);
+        quizRepository.deleteById(quizId);
     }
 }

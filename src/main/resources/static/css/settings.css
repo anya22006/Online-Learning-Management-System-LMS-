@@ -1,240 +1,44 @@
-* {
-    box-sizing: border-box;
-}
-
 body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    display: flex;
+    min-height: 100vh;
     margin: 0;
-    background: #f5f7fb;
-    color: #172033;
-    font-family: Arial, sans-serif;
 }
 
 .dashboard {
+    display: flex;
+    width: 100%;
     min-height: 100vh;
 }
 
 .sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 240px;
-    padding: 28px 18px;
+    width: 260px;
     background: #111827;
-}
-
-.logo {
-    padding: 0 12px 34px;
-}
-
-.logo h2 {
-    margin: 0;
-    color: #fff;
-    font-size: 24px;
-}
-
-.sidebar nav {
+    border-right: 1px solid #334155;
+    padding: 24px 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    min-height: 100vh;
+    flex-shrink: 0;
 }
 
-.sidebar nav a {
-    padding: 13px 14px;
-    border-radius: 8px;
-    color: #cbd5e1;
-    font-size: 15px;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
+.main-content, .main-wrapper {
+    flex: 1;
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    display: flex;
+    flex-direction: column;
 }
 
-.sidebar nav a:hover,
-.sidebar nav a.active {
-    background: #2563eb;
-    color: #fff;
-}
-
-.sidebar nav a.logout {
-    margin-top: 18px;
-    color: #fca5a5;
-}
-
-.main-content {
-    width: min(1120px, calc(100% - 240px));
-    margin-left: 240px;
-    padding: 42px;
-}
-
-.page-heading {
-    margin-bottom: 28px;
-}
-
-.eyebrow {
-    margin: 0 0 9px;
-    color: #2563eb;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-}
-
-h1 {
-    margin: 0;
-    font-size: clamp(28px, 4vw, 36px);
-}
-
-.intro,
-.card-intro {
-    color: #64748b;
-    line-height: 1.6;
-}
-
-.intro {
-    margin: 10px 0 0;
-}
-
-.profile-card {
-    max-width: 720px;
-    padding: 28px;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
-}
-
-.profile-card h2 {
-    margin: 0;
-    font-size: 22px;
-}
-
-.card-intro {
-    margin: 8px 0 24px;
-}
-
-#profile-form {
-    display: grid;
-    gap: 10px;
-}
-
-#profile-form label {
-    margin-top: 8px;
-    color: #334155;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-#profile-form input {
-    width: 100%;
-    min-height: 44px;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    color: #172033;
-    font: inherit;
-}
-
-#profile-form input:focus {
-    border-color: #2563eb;
-    outline: 3px solid rgba(37, 99, 235, 0.15);
-}
-
-.account-details {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin: 12px 0;
-}
-
-.account-details div {
-    display: grid;
-    gap: 6px;
-    padding: 14px;
-    border-radius: 8px;
-    background: #f1f5f9;
-}
-
-.account-details span {
-    color: #64748b;
-    font-size: 13px;
-}
-
-.account-details strong {
-    color: #172033;
-    overflow-wrap: anywhere;
-}
-
-.primary-button {
-    justify-self: start;
-    margin-top: 8px;
-    padding: 12px 18px;
-    border: 0;
-    border-radius: 8px;
-    background: #2563eb;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.primary-button:hover:not(:disabled) {
-    background: #1d4ed8;
-}
-
-.primary-button:disabled {
-    cursor: wait;
-    opacity: 0.65;
-}
-
-.message {
-    margin: 0 0 16px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.message.success {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.message.error {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-@media (max-width: 760px) {
-    .sidebar {
-        position: static;
-        width: 100%;
-        padding: 18px;
-    }
-
-    .logo {
-        padding: 0 8px 18px;
-    }
-
-    .sidebar nav {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 4px;
-    }
-
-    .sidebar nav a {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    .main-content {
-        width: 100%;
-        margin-left: 0;
-        padding: 28px 18px;
-    }
-
-    .profile-card {
-        padding: 22px 18px;
-    }
-}
-
-@media (max-width: 420px) {
-    .account-details {
-        grid-template-columns: 1fr;
-    }
+.profile-card, .card-section {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
+    color: #f8fafc !important;
 }

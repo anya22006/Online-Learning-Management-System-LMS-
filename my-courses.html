@@ -1,142 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Courses | LMS</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f46e5'/><text y='.9em' font-size='70' font-weight='bold' fill='white' x='25'>L</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet"
-          href="css/my-courses.css">
-
+    <link rel="stylesheet" href="css/instructor.css?v=2.0">
+    <link rel="stylesheet" href="css/my-courses.css?v=2.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
-
 <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div class="brand-text">LMS Student</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="student-dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard Overview</a>
+            <a href="my-courses.html" class="nav-item active"><i class="fa-solid fa-book-open"></i> My Courses</a>
+            <a href="my-assignments.html" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Assignments</a>
+            <a href="my-grades.html" class="nav-item"><i class="fa-solid fa-award"></i> My Grades</a>
+            <a href="my-quizzes.html" class="nav-item"><i class="fa-solid fa-brain"></i> Quizzes</a>
+            <a href="my-progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> My Progress</a>
+            <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="#" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+    </aside>
 
-    <div class="dashboard">
-
-
-        <!-- ==============================
-             SIDEBAR
-        =============================== -->
-
-        <aside class="sidebar">
-
-            <div class="logo">
-                <h2>LMS</h2>
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header class="header">
+            <div class="header-title">
+                <h1>My Enrolled Courses</h1>
             </div>
+            <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
+        </header>
 
+        <div class="content-body">
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-book"></i> Enrolled Curriculum</h2>
+                </div>
 
-            <nav>
-
-                <a href="student-dashboard.html">
-                    <i class="fa-solid fa-house"></i> Dashboard
-                </a>
-
-                <a href="my-courses.html"
-                   class="active">
-                    <i class="fa-solid fa-book"></i> My Courses
-                </a>
-
-                <a href="course-catalog.html">
-                    <i class="fa-solid fa-magnifying-glass"></i> Browse Courses
-                </a>
-
-                <a href="my-assignments.html">
-                    <i class="fa-solid fa-file-pen"></i> Assignments
-                </a>
-
-                <a href="my-grades.html">
-                    <i class="fa-solid fa-chart-column"></i> Grades
-                </a>
-
-                <a href="my-quizzes.html">
-                    <i class="fa-solid fa-brain"></i> Quizzes
-                </a>
-
-                <a href="my-progress.html">
-                    <i class="fa-solid fa-chart-line"></i> My Progress
-                </a>
-
-                <a href="settings.html">
-                    <i class="fa-solid fa-gear"></i> Settings
-                </a>
-
-                <a href="#"
-                   class="logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
-
-            </nav>
-
-        </aside>
-
-
-
-        <!-- ==============================
-             MAIN CONTENT
-        =============================== -->
-
-        <main class="main-content">
-
-
-            <div class="topbar">
-
-                <h1>
-                    My Courses
-                </h1>
-
+                <div id="my-course-list" class="course-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 16px;">
+                    <p id="loading-message" style="color: var(--text-muted);">Loading your courses...</p>
+                </div>
             </div>
-
-
-
-            <!-- PAGE HEADER -->
-
-            <section class="page-header">
-
-                <h2>
-                    Your Learning
-                </h2>
-
-                <p>
-                    View the courses you are
-                    currently enrolled in.
-                </p>
-
-            </section>
-
-
-
-            <!-- COURSE LIST -->
-
-            <section
-                id="my-course-list"
-                class="course-grid"
-            >
-
-                <p id="loading-message">
-                    Loading your courses...
-                </p>
-
-            </section>
-
-
-        </main>
-
+        </div>
     </div>
 
-
-
     <!-- JAVASCRIPT -->
-
     <script src="js/student.js"></script>
-
 </body>
-
 </html>

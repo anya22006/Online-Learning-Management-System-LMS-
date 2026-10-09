@@ -7,6 +7,7 @@ public class QuizRequestDTO {
     private String title;
     private String instructions;
     private Integer timeLimitMinutes;
+    private Integer totalMarks;
     private List<QuizQuestionDTO> questions;
 
     public QuizRequestDTO() {}
@@ -22,6 +23,9 @@ public class QuizRequestDTO {
 
     public Integer getTimeLimitMinutes() { return timeLimitMinutes; }
     public void setTimeLimitMinutes(Integer timeLimitMinutes) { this.timeLimitMinutes = timeLimitMinutes; }
+
+    public Integer getTotalMarks() { return totalMarks; }
+    public void setTotalMarks(Integer totalMarks) { this.totalMarks = totalMarks; }
 
     public List<QuizQuestionDTO> getQuestions() { return questions; }
     public void setQuestions(List<QuizQuestionDTO> questions) { this.questions = questions; }
