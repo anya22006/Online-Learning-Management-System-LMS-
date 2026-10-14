@@ -1,25 +1,43 @@
-const STUDENT_PROFILE_URL = "http://localhost:8080/api/student/profile/1";
+let currentStudentId = 1;
 
 const profileForm = document.getElementById("profile-form");
 const profileMessage = document.getElementById("profile-message");
 const saveButton = document.getElementById("save-profile");
 
 function showProfileMessage(message, type) {
+    if (!profileMessage) return;
     profileMessage.textContent = message;
     profileMessage.className = `message ${type}`;
     profileMessage.hidden = false;
 }
 
 function displayProfile(profile) {
-    document.getElementById("profile-name").value = profile.name ?? "";
-    document.getElementById("profile-email").value = profile.email ?? "";
-    document.getElementById("profile-role").textContent = profile.role ?? "Not available";
-    document.getElementById("profile-status").textContent = profile.status ?? "Not available";
+    const nameEl = document.getElementById("profile-name");
+    const emailEl = document.getElementById("profile-email");
+    const roleEl = document.getElementById("profile-role");
+    const statusEl = document.getElementById("profile-status");
+
+    if (nameEl) nameEl.value = profile.name ?? "";
+    if (emailEl) emailEl.value = profile.email ?? "";
+    if (roleEl) roleEl.textContent = profile.role ?? "Student";
+    if (statusEl) statusEl.textContent = profile.status ?? "Active";
 }
 
 async function loadProfile() {
     try {
-        const response = await fetch(STUDENT_PROFILE_URL);
+        const currentRes = await fetch("http://localhost:8080/api/student/current");
+        if (currentRes.ok) {
+            const currentUser = await currentRes.json();
+            if (currentUser && currentUser.id) {
+                currentStudentId = currentUser.id;
+            }
+        }
+    } catch (e) {
+        console.warn("Could not fetch current student, fallback to ID:", currentStudentId);
+    }
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/student/profile/${currentStudentId}`);
         if (!response.ok) {
             throw new Error(`Could not load profile (HTTP ${response.status}).`);
         }
@@ -29,35 +47,46 @@ async function loadProfile() {
     }
 }
 
-profileForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    profileMessage.hidden = true;
-    saveButton.disabled = true;
+if (profileForm) {
+    profileForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (profileMessage) profileMessage.hidden = true;
+        if (saveButton) saveButton.disabled = true;
 
-    const request = {
-        name: document.getElementById("profile-name").value.trim(),
-        email: document.getElementById("profile-email").value.trim()
-    };
+        const request = {
+            name: document.getElementById("profile-name").value.trim(),
+            email: document.getElementById("profile-email").value.trim()
+        };
 
-    try {
-        const response = await fetch(STUDENT_PROFILE_URL, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(request)
-        });
+        try {
+            const response = await fetch(`http://localhost:8080/api/student/profile/${currentStudentId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(request)
+            });
 
-        if (!response.ok) {
-            const problem = await response.json().catch(() => null);
-            throw new Error(problem?.detail || problem?.message || `Could not save profile (HTTP ${response.status}).`);
+            if (!response.ok) {
+                const problem = await response.json().catch(() => null);
+                throw new Error(problem?.detail || problem?.message || `Could not save profile (HTTP ${response.status}).`);
+            }
+
+            const updated = await response.json();
+            displayProfile(updated);
+            sessionStorage.setItem("currentStudent", JSON.stringify({
+                authenticated: true,
+                id: currentStudentId,
+                studentId: currentStudentId,
+                name: updated.name,
+                email: updated.email,
+                role: updated.role
+            }));
+            showProfileMessage("Your profile was saved successfully.", "success");
+        } catch (error) {
+            showProfileMessage(error.message || "Could not save your profile. Please try again.", "error");
+        } finally {
+            if (saveButton) saveButton.disabled = false;
         }
-
-        displayProfile(await response.json());
-        showProfileMessage("Your profile was saved successfully.", "success");
-    } catch (error) {
-        showProfileMessage(error.message || "Could not save your profile. Please try again.", "error");
-    } finally {
-        saveButton.disabled = false;
-    }
-});
+    });
+}
 
 loadProfile();

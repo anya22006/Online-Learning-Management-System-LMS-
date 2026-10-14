@@ -46,4 +46,7 @@ public class ActivityLog {
 
     public String getAffectedResource() { return affectedResource; }
     public void setAffectedResource(String affectedResource) { this.affectedResource = affectedResource; }
+
+    public String getDetails() { return affectedResource; }
+    public void setDetails(String details) { this.affectedResource = details; }
 }

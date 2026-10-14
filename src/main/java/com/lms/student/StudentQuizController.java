@@ -1,9 +1,12 @@
 package com.lms.student;
 
+import com.lms.common.SecurityHelper;
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
 import com.lms.quiz.*;
 import com.lms.student.dto.StudentQuizDTO;
+import com.lms.user.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +32,9 @@ public class StudentQuizController {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private SecurityHelper securityHelper;
 
     @GetMapping({"/quizzes", "/quizzes/{studentId}"})
     public ResponseEntity<List<StudentQuizDTO>> getStudentQuizzes(@PathVariable(required = false) Long studentId) {
@@ -75,10 +81,29 @@ public class StudentQuizController {
 
     @PostMapping("/quiz-attempts")
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Map<String, Object>> submitQuizAttempt(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Map<String, Object>> submitQuizAttempt(
+            @RequestBody Map<String, Object> payload,
+            HttpSession session) {
         Long quizId = payload.get("quizId") != null ? Long.valueOf(payload.get("quizId").toString()) : 1L;
-        Long studentId = payload.get("studentId") != null ? Long.valueOf(payload.get("studentId").toString()) : 1L;
-        String studentName = payload.get("studentName") != null ? payload.get("studentName").toString() : "Alex Johnson";
+        User currentUser = securityHelper.getCurrentUser(session);
+
+        Long studentId;
+        if (payload.get("studentId") != null) {
+            studentId = Long.valueOf(payload.get("studentId").toString());
+        } else if (currentUser != null) {
+            studentId = currentUser.getId();
+        } else {
+            studentId = 1L;
+        }
+
+        String studentName;
+        if (payload.get("studentName") != null) {
+            studentName = payload.get("studentName").toString();
+        } else if (currentUser != null) {
+            studentName = currentUser.getFullName();
+        } else {
+            studentName = "Student #" + studentId;
+        }
 
         List<QuizQuestion> questions = quizQuestionRepository.findByQuizId(quizId);
         Map<String, Object> answers = (Map<String, Object>) payload.get("answers");
@@ -135,8 +160,15 @@ public class StudentQuizController {
         ));
     }
 
-    @GetMapping("/quiz-attempts/{studentId}")
-    public ResponseEntity<List<QuizAttempt>> getStudentQuizAttempts(@PathVariable Long studentId) {
-        return ResponseEntity.ok(quizAttemptRepository.findByStudentId(studentId));
+    @GetMapping({"/quiz-attempts", "/quiz-attempts/{studentId}"})
+    public ResponseEntity<List<QuizAttempt>> getStudentQuizAttempts(
+            @PathVariable(required = false) Long studentId,
+            HttpSession session) {
+        Long targetStudentId = studentId;
+        if (targetStudentId == null) {
+            User currentUser = securityHelper.getCurrentUser(session);
+            targetStudentId = (currentUser != null) ? currentUser.getId() : 1L;
+        }
+        return ResponseEntity.ok(quizAttemptRepository.findByStudentId(targetStudentId));
     }
 }

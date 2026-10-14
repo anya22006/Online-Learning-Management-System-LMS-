@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile Settings | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('settings', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Profile & Account Settings', 'Manage your account credentials stored in SQLite', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body" style="max-width: 700px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="card-section">
+                <form th:action="@{/student/settings}" method="POST">
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Email Address (Primary Key in SQLite)</label>
+                        <input type="text" class="form-control" th:value="${currentUser.email}" readonly style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: #94a3b8; font-size: 14px; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Full Name</label>
+                        <input type="text" name="fullName" class="form-control" th:value="${currentUser.fullName}" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Department / Major</label>
+                        <input type="text" name="department" class="form-control" th:value="${currentUser.department}" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">New Password (leave blank to keep current)</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 14px;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

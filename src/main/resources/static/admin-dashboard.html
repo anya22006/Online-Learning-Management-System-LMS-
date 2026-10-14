@@ -31,6 +31,7 @@
             <a href="#reports" class="nav-item" onclick="switchTab('reports', this)"><i class="fa-solid fa-chart-pie"></i> Analytics & Reports</a>
             <a href="#settings" class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i> System Settings</a>
             <a href="#activity" class="nav-item" onclick="switchTab('activity', this)"><i class="fa-solid fa-clock-rotate-left"></i> Activity Logs</a>
+            <a href="/logout" class="nav-item" style="color: #fda4af;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
         </nav>
     </aside>
 
@@ -40,11 +41,12 @@
             <div class="header-title" style="display: flex; align-items: center; gap: 20px;">
                 <h1>System Control Center</h1>
             </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
                 <div title="System Notifications" style="cursor: pointer; position: relative;">
                     <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--text-muted);"></i>
                 </div>
                 <div class="user-badge"><i class="fa-solid fa-user-shield"></i> Logged in as Administrator</div>
+                <a href="/logout" class="btn btn-secondary btn-sm" style="color: #fda4af; border-color: rgba(244, 63, 94, 0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
             </div>
         </header>
 

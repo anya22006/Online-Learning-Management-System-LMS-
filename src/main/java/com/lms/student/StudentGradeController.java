@@ -2,6 +2,7 @@ package com.lms.student;
 
 import com.lms.assignment.Assignment;
 import com.lms.assignment.AssignmentRepository;
+import com.lms.common.SecurityHelper;
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
 import com.lms.grading.Grade;
@@ -9,6 +10,8 @@ import com.lms.grading.GradeRepository;
 import com.lms.grading.Submission;
 import com.lms.grading.SubmissionRepository;
 import com.lms.student.dto.StudentGradeDTO;
+import com.lms.user.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,10 +37,19 @@ public class StudentGradeController {
     @Autowired
     private GradeRepository gradeRepository;
 
+    @Autowired
+    private SecurityHelper securityHelper;
+
     @GetMapping({"/{studentId}", ""})
     public ResponseEntity<List<StudentGradeDTO>> getStudentGrades(
-            @PathVariable(required = false) Long studentId) {
-        Long targetStudentId = (studentId != null) ? studentId : 1L;
+            @PathVariable(required = false) Long studentId,
+            HttpSession session) {
+        Long targetStudentId = studentId;
+        if (targetStudentId == null) {
+            User currentUser = securityHelper.getCurrentUser(session);
+            targetStudentId = (currentUser != null) ? currentUser.getId() : 1L;
+        }
+
         List<Submission> submissions = submissionRepository.findByStudentId(targetStudentId);
         List<StudentGradeDTO> result = new ArrayList<>();
 

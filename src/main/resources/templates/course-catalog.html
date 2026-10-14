@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Course Catalog | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('catalog', ${currentUser != null ? currentUser.role : 'STUDENT'})}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Course Catalog', 'Discover and enroll in courses available in SQLite', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
+                <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;" th:each="course : ${courses}">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 11px; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 4px 10px; border-radius: 6px; font-weight: 600;" th:text="${course.category}">Web Dev</span>
+                            <span th:if="${#sets.contains(enrolledCourseIds, course.courseId)}" style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                <i class="fa-solid fa-check"></i> Enrolled
+                            </span>
+                        </div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 10px;" th:text="${course.title}">Course Title</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;" th:text="${course.description}">Description</p>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <a th:href="@{'/student/course/' + ${course.courseId}}" style="color: #94a3b8; font-size: 13px; text-decoration: none;">
+                            <i class="fa-solid fa-circle-info"></i> View Syllabus
+                        </a>
+
+                        <div>
+                            <span th:if="${#sets.contains(enrolledCourseIds, course.courseId)}" style="font-size: 13px; color: #10b981; font-weight: 600;">
+                                <i class="fa-solid fa-check-double"></i> Already Enrolled
+                            </span>
+                            <form th:unless="${#sets.contains(enrolledCourseIds, course.courseId)}" th:action="@{/student/enroll}" method="POST" style="margin: 0;">
+                                <input type="hidden" name="courseId" th:value="${course.courseId}">
+                                <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                                    <i class="fa-solid fa-user-plus"></i> Enroll Now
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

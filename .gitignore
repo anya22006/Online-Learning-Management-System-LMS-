@@ -10,3 +10,5 @@ apache-maven-3.9.6/
 scratch/
 node_modules/
 .env
+*.db
+cookies*.txt

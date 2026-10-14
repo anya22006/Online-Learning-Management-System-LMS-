@@ -1,5 +1,28 @@
 const GRADES_API_URL = "http://localhost:8080/api/student/grades";
-const STUDENT_ID = 1;
+let CURRENT_STUDENT = null;
+
+async function getAuthStudent() {
+    if (CURRENT_STUDENT) return CURRENT_STUDENT;
+    try {
+        const res = await fetch("http://localhost:8080/api/student/current");
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.authenticated) {
+                CURRENT_STUDENT = data;
+                sessionStorage.setItem("currentStudent", JSON.stringify(data));
+                return data;
+            }
+        }
+    } catch (e) {}
+    const cached = sessionStorage.getItem("currentStudent");
+    if (cached) {
+        try {
+            CURRENT_STUDENT = JSON.parse(cached);
+            return CURRENT_STUDENT;
+        } catch (e) {}
+    }
+    return { id: 1, name: "Student" };
+}
 
 function escapeHtml(value) {
     return String(value)
@@ -39,8 +62,8 @@ function renderGrade(grade) {
     const assignmentTitle = escapeHtml(grade.assignmentTitle || "Assignment");
     const status = escapeHtml(grade.submissionStatus || "Status unavailable");
     const marks = isGraded(grade)
-        ? escapeHtml(grade.marks)
-        : "Not graded";
+        ? `${escapeHtml(grade.marks)} pts`
+        : "Pending Grade";
     const feedback = grade.feedback
         ? escapeHtml(grade.feedback)
         : "No instructor feedback yet.";
@@ -50,7 +73,7 @@ function renderGrade(grade) {
         <article class="grade-card">
             <div class="grade-card-header">
                 <div>
-                    <p class="course-name">${courseTitle}</p>
+                    <p class="course-name"><i class="fa-solid fa-graduation-cap"></i> ${courseTitle}</p>
                     <h2>${assignmentTitle}</h2>
                 </div>
                 <strong class="grade-marks">${marks}</strong>
@@ -76,10 +99,11 @@ function updateGradeSummary(grades) {
         ? null
         : totalMarks / gradedRecords.length;
 
-    document.getElementById("graded-count").textContent =
-        String(gradedRecords.length);
-    document.getElementById("average-marks").textContent =
-        average === null ? "—" : Number(average.toFixed(2)).toString();
+    const countEl = document.getElementById("graded-count");
+    const avgEl = document.getElementById("average-marks");
+
+    if (countEl) countEl.textContent = String(gradedRecords.length);
+    if (avgEl) avgEl.textContent = average === null ? "—" : Number(average.toFixed(1)).toString() + "%";
 
     return gradedRecords.length;
 }
@@ -89,7 +113,8 @@ async function loadGrades() {
     const gradeNotice = document.getElementById("grade-notice");
 
     try {
-        const response = await fetch(`${GRADES_API_URL}/${STUDENT_ID}`);
+        const student = await getAuthStudent();
+        const response = await fetch(`${GRADES_API_URL}/${student.id}`);
         if (!response.ok) {
             throw new Error(`Grades could not be loaded (HTTP ${response.status}).`);
         }
@@ -100,26 +125,44 @@ async function loadGrades() {
         }
 
         const gradedCount = updateGradeSummary(grades);
-        if (gradedCount === 0 && grades.length > 0) {
-            gradeNotice.textContent =
-                "No graded assignments yet. Your submitted assignments are shown below while they await grading.";
-            gradeNotice.hidden = false;
+        if (gradeNotice) {
+            if (gradedCount === 0 && grades.length > 0) {
+                gradeNotice.textContent =
+                    "No graded assignments yet. Your submitted assignments are shown below while they await grading.";
+                gradeNotice.hidden = false;
+            } else {
+                gradeNotice.hidden = true;
+            }
         }
 
         if (grades.length === 0) {
-            gradeList.innerHTML = `
-                <p class="state-message">No graded assignments yet.</p>`;
+            if (gradeList) {
+                gradeList.innerHTML = `
+                    <div class="empty-message" style="padding: 32px; text-align: center; background: rgba(30, 41, 59, 0.4); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="fa-solid fa-award" style="font-size: 2.5rem; color: var(--accent-indigo); margin-bottom: 12px;"></i>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 6px;">No grades available yet</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 16px;">Once you submit assignments and your instructor evaluates them, your graded results will appear here.</p>
+                        <a href="my-assignments.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;"><i class="fa-solid fa-pen-to-square"></i> Go to Assignments</a>
+                    </div>
+                `;
+            }
             return;
         }
 
-        gradeList.innerHTML = grades.map(renderGrade).join("");
+        if (gradeList) {
+            gradeList.innerHTML = grades.map(renderGrade).join("");
+        }
     } catch (error) {
-        console.error("Unable to load student grades:", error);
-        gradeList.innerHTML = `
-            <p class="state-message error">
-                ${escapeHtml(error.message || "Grades could not be loaded. Please try again later.")}
-            </p>`;
+        console.error("Unable to load grades:", error);
+        if (gradeList) {
+            gradeList.innerHTML = `
+                <p class="state-message error">
+                    ${escapeHtml(error.message || "Grades could not be loaded. Please try again later.")}
+                </p>`;
+        }
     }
 }
 
-document.addEventListener("DOMContentLoaded", loadGrades);
+document.addEventListener("DOMContentLoaded", () => {
+    loadGrades();
+});

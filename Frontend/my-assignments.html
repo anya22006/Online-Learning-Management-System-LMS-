@@ -20,12 +20,13 @@
         <nav class="nav-menu">
             <a href="student-dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard Overview</a>
             <a href="my-courses.html" class="nav-item"><i class="fa-solid fa-book-open"></i> My Courses</a>
+            <a href="course-catalog.html" class="nav-item"><i class="fa-solid fa-compass"></i> Course Catalog</a>
             <a href="my-assignments.html" class="nav-item active"><i class="fa-solid fa-pen-to-square"></i> Assignments</a>
             <a href="my-grades.html" class="nav-item"><i class="fa-solid fa-award"></i> My Grades</a>
             <a href="my-quizzes.html" class="nav-item"><i class="fa-solid fa-brain"></i> Quizzes</a>
             <a href="my-progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> My Progress</a>
             <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
-            <a href="#" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="/logout" class="nav-item logout" style="color: #fda4af;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
         </nav>
     </aside>
 
@@ -35,7 +36,10 @@
             <div class="header-title">
                 <h1>Assignments & Coursework</h1>
             </div>
-            <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
+                <a href="/logout" class="btn btn-secondary btn-sm" style="color: #fda4af; border-color: rgba(244, 63, 94, 0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+            </div>
         </header>
 
         <div class="content-body">

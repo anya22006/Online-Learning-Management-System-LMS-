@@ -2,6 +2,7 @@ package com.lms.student;
 
 import com.lms.assignment.Assignment;
 import com.lms.assignment.AssignmentRepository;
+import com.lms.common.SecurityHelper;
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
 import com.lms.grading.Grade;
@@ -9,6 +10,8 @@ import com.lms.grading.GradeRepository;
 import com.lms.grading.Submission;
 import com.lms.grading.SubmissionRepository;
 import com.lms.student.dto.StudentAssignmentDTO;
+import com.lms.user.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,10 +39,19 @@ public class StudentAssignmentController {
     @Autowired
     private GradeRepository gradeRepository;
 
+    @Autowired
+    private SecurityHelper securityHelper;
+
     @GetMapping({"/assignments", "/assignments/{studentId}"})
     public ResponseEntity<List<StudentAssignmentDTO>> getStudentAssignments(
-            @PathVariable(required = false) Long studentId) {
-        Long targetStudentId = (studentId != null) ? studentId : 1L;
+            @PathVariable(required = false) Long studentId,
+            HttpSession session) {
+        Long targetStudentId = studentId;
+        if (targetStudentId == null) {
+            User currentUser = securityHelper.getCurrentUser(session);
+            targetStudentId = (currentUser != null) ? currentUser.getId() : 1L;
+        }
+
         List<Assignment> assignments = assignmentRepository.findAll();
         List<StudentAssignmentDTO> result = new ArrayList<>();
 
@@ -81,18 +93,39 @@ public class StudentAssignmentController {
     }
 
     @PostMapping("/submissions")
-    public ResponseEntity<Submission> submitAssignment(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Submission> submitAssignment(
+            @RequestBody Map<String, Object> payload,
+            HttpSession session) {
         Long assignmentId = Long.valueOf(payload.get("assignmentId").toString());
-        Long studentId = payload.get("studentId") != null ? Long.valueOf(payload.get("studentId").toString()) : 1L;
+        User currentUser = securityHelper.getCurrentUser(session);
+
+        Long studentId;
+        if (payload.get("studentId") != null) {
+            studentId = Long.valueOf(payload.get("studentId").toString());
+        } else if (currentUser != null) {
+            studentId = currentUser.getId();
+        } else {
+            studentId = 1L;
+        }
+
+        String studentName;
+        if (payload.get("studentName") != null) {
+            studentName = payload.get("studentName").toString();
+        } else if (currentUser != null) {
+            studentName = currentUser.getFullName();
+        } else {
+            studentName = "Student #" + studentId;
+        }
+
         String content = payload.get("content") != null ? payload.get("content").toString() :
                         (payload.get("submissionFile") != null ? payload.get("submissionFile").toString() : "");
-        String studentName = payload.get("studentName") != null ? payload.get("studentName").toString() : "Alex Johnson";
 
         Optional<Submission> existing = submissionRepository.findByStudentIdAndAssignmentId(studentId, assignmentId);
         Submission submission;
         if (existing.isPresent()) {
             submission = existing.get();
             submission.setContent(content);
+            submission.setStudentName(studentName);
             submission.setSubmittedAt(LocalDateTime.now());
         } else {
             submission = new Submission(assignmentId, studentId, studentName, content);

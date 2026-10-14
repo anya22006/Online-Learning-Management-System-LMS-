@@ -1,99 +1,93 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Courses | LMS Instructor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/instructor.css}" href="/css/instructor.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<head th:replace="~{fragments/layout :: head('Manage Courses | LMS Instructor')}"></head>
 <body>
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">L</div>
-            <div class="brand-text">LMS</div>
-        </div>
-        <nav class="nav-menu">
-            <a th:href="@{/instructor/dashboard}" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard Overview</a>
-            <a th:href="@{/instructor/manage-courses}" class="nav-item active"><i class="fa-solid fa-book-open"></i> Manage Courses</a>
-            <a th:href="@{/instructor/create-course}" class="nav-item"><i class="fa-solid fa-folder-plus"></i> Create Course</a>
-            <a th:href="@{/instructor/create-assignment}" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Create Quiz & Assignment</a>
-            <a th:href="@{/instructor/grade-submissions}" class="nav-item"><i class="fa-solid fa-award"></i> Grade Submissions</a>
-        </nav>
-    </aside>
+    <aside th:replace="~{fragments/layout :: sidebar('manage-courses', ${currentUser != null ? currentUser.role : 'INSTRUCTOR'})}"></aside>
 
     <div class="main-wrapper">
-        <header class="header">
-            <div class="header-title">
-                <h1>Manage Courses</h1>
-            </div>
-            <div class="user-badge"><i class="fa-solid fa-user-tie"></i> Logged in as Instructor (ID: 2)</div>
-        </header>
+        <header th:replace="~{fragments/layout :: header('Manage Courses', 'Publish, edit syllabus, add lessons, and configure curriculum', ${currentUser}, 'Instructor')}"></header>
 
         <div class="content-body">
-            <div class="card-section">
-                <div class="section-header">
-                    <h2>All Created Courses</h2>
-                    <a th:href="@{/instructor/create-course}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create New Course</a>
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div th:if="${#lists.isEmpty(courses)}" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                No courses created yet.
+            </div>
+
+            <div th:each="c : ${courses}" style="background: #111827; border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <h2 style="font-size: 20px; font-weight: 700; color: #fff;" th:text="${c.title}">Course Title</h2>
+                            <span class="badge" th:classappend="${c.status.name() == 'PUBLISHED' ? 'badge-success' : 'badge-warning'}" th:text="${c.status}">PUBLISHED</span>
+                            <span style="font-size: 11px; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 3px 8px; border-radius: 4px;" th:text="${c.category}">Web Dev</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted);" th:text="${c.description}">Course description</p>
+                    </div>
+
+                    <!-- Actions Bar -->
+                    <div style="display: flex; gap: 8px;">
+                        <form th:action="@{'/instructor/course/' + ${c.courseId} + '/toggle-status'}" method="POST" style="margin: 0;">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-toggle-on"></i>
+                                <span th:text="${c.status.name() == 'PUBLISHED' ? 'Unpublish' : 'Publish'}">Publish</span>
+                            </button>
+                        </form>
+                        <form th:action="@{'/instructor/course/' + ${c.courseId} + '/delete'}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this course from SQLite?');">
+                            <button type="submit" class="btn btn-sm" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 6px; cursor: pointer;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 60px;">ID</th>
-                            <th style="width: 180px;">Title</th>
-                            <th style="width: 120px;">Category</th>
-                            <th style="width: 100px;">Status</th>
-                            <th>Course Assessments (Assignments & Quizzes)</th>
-                            <th style="width: 230px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="course : ${courses}">
-                            <td th:text="'#' + ${course.courseId}">#1</td>
-                            <td><strong th:text="${course.title}">Course Title</strong></td>
-                            <td th:text="${course.category}">Category</td>
-                            <td>
-                                <span class="badge" th:classappend="${course.status == 'PUBLISHED' ? 'badge-published' : 'badge-draft'}" th:text="${course.status}">PUBLISHED</span>
-                            </td>
-                            <td>
-                                <div style="display: flex; flex-direction: column; gap: 8px;">
-                                    <div th:if="${#lists.size(courseAssignments.get(course.courseId)) > 0}" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 6px; padding: 6px 10px;">
-                                        <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; margin-bottom: 4px;">
-                                            <i class="fa-solid fa-file-pen"></i> Assignments (<span th:text="${#lists.size(courseAssignments.get(course.courseId))}">0</span>)
-                                        </div>
-                                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                                            <span th:each="a : ${courseAssignments.get(course.courseId)}" style="background: #1e293b; color: #f8fafc; font-size: 12px; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155; display: inline-flex; align-items: center; gap: 6px;">
-                                                <strong th:text="${a.title}">Assignment Title</strong>
-                                                <span style="color: #94a3b8; font-size: 11px;" th:text="'(' + ${a.maxScore} + ' pts)'">(100 pts)</span>
-                                            </span>
-                                        </div>
-                                    </div>
+                <!-- Course Breakdown Grid: Lessons, Assignments, Quizzes -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 18px;">
+                    <!-- Lessons -->
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fa-solid fa-play-circle" style="color: #6366f1;"></i> Lessons (<span th:text="${#lists.size(courseLessons.get(c.courseId))}">0</span>)</span>
+                        </h4>
+                        <div th:each="l : ${courseLessons.get(c.courseId)}" style="background: #0f172a; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <span th:text="${l.lessonOrder} + '. ' + ${l.title}">Lesson 1</span>
+                        </div>
+                        <!-- Add Lesson Inline Form -->
+                        <form th:action="@{'/instructor/course/' + ${c.courseId} + '/add-lesson'}" method="POST" style="margin-top: 8px;">
+                            <input type="text" name="title" placeholder="+ Add lesson title..." required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: #fff; margin-bottom: 6px;">
+                            <input type="hidden" name="contentUrl" value="https://docs.spring.io/">
+                            <input type="hidden" name="lessonOrder" th:value="${#lists.size(courseLessons.get(c.courseId)) + 1}">
+                            <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%; font-size: 11px; padding: 4px;">Save Lesson</button>
+                        </form>
+                    </div>
 
-                                    <div th:if="${#lists.size(courseQuizzes.get(course.courseId)) > 0}" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 6px 10px;">
-                                        <div style="font-size: 11px; font-weight: 700; color: #34d399; text-transform: uppercase; margin-bottom: 4px;">
-                                            <i class="fa-solid fa-brain"></i> Quizzes (<span th:text="${#lists.size(courseQuizzes.get(course.courseId))}">0</span>)
-                                        </div>
-                                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                                            <span th:each="q : ${courseQuizzes.get(course.courseId)}" style="background: #1e293b; color: #f8fafc; font-size: 12px; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155; display: inline-flex; align-items: center; gap: 6px;">
-                                                <strong th:text="${q.title}">Quiz Title</strong>
-                                                <span style="color: #94a3b8; font-size: 11px;" th:text="'(' + (${q.totalMarks} ?: 100) + ' pts, ' + (${q.timeLimitMinutes} ?: 30) + 'm)'">(100 pts)</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div th:if="${#lists.isEmpty(courseAssignments.get(course.courseId)) and #lists.isEmpty(courseQuizzes.get(course.courseId))}" style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                                        No assignments or quizzes created yet.
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <a th:href="@{/instructor/create-assignment(courseId=${course.courseId})}" class="btn btn-primary" style="font-size: 12px; padding: 6px 10px;"><i class="fa-solid fa-plus"></i> Quiz/Assignment</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <!-- Assignments -->
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: var(--accent-amber);"></i> Assignments (<span th:text="${#lists.size(courseAssignments.get(c.courseId))}">0</span>)
+                        </h4>
+                        <div th:each="a : ${courseAssignments.get(c.courseId)}" style="background: #0f172a; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <span th:text="${a.title}">Assignment</span>
+                            <span style="color: var(--text-muted); font-size: 11px;" th:text="${a.maxScore} + ' pts'">100 pts</span>
+                        </div>
+                        <a th:href="@{'/instructor/create-assignment?courseId=' + ${c.courseId}}" class="btn btn-secondary btn-sm" style="width: 100%; font-size: 11px; padding: 6px; display: block; text-align: center; margin-top: 8px; text-decoration: none;">
+                            + Add Assignment
+                        </a>
+                    </div>
+
+                    <!-- Quizzes -->
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;">
+                            <i class="fa-solid fa-brain" style="color: var(--accent-emerald);"></i> Quizzes (<span th:text="${#lists.size(courseQuizzes.get(c.courseId))}">0</span>)
+                        </h4>
+                        <div th:each="q : ${courseQuizzes.get(c.courseId)}" style="background: #0f172a; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <span th:text="${q.title}">Quiz</span>
+                            <span style="color: var(--text-muted); font-size: 11px;" th:text="${q.totalMarks} + ' pts'">100 pts</span>
+                        </div>
+                        <a th:href="@{'/instructor/create-assignment?courseId=' + ${c.courseId}}" class="btn btn-secondary btn-sm" style="width: 100%; font-size: 11px; padding: 6px; display: block; text-align: center; margin-top: 8px; text-decoration: none;">
+                            + Add Quiz
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

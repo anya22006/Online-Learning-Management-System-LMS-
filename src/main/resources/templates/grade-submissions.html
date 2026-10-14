@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Grade Submissions | LMS Instructor')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('grade-submissions', ${currentUser != null ? currentUser.role : 'INSTRUCTOR'})}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Review & Grade Submissions', 'Evaluate student coursework and persist grades to SQLite', ${currentUser}, 'Instructor')}"></header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Student Submissions -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-file-signature"></i> Student Assignment Submissions</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(submissionRows)}" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                    No assignment submissions received yet.
+                </div>
+
+                <div th:each="row : ${submissionRows}" style="background: #111827; border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                <strong style="font-size: 16px; color: #fff;" th:text="${row.submission.studentName != null ? row.submission.studentName : 'Student #' + row.submission.studentId}">Student Name</strong>
+                                <span style="font-size: 11px; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 2px 8px; border-radius: 4px;" th:text="'Student ID: ' + ${row.submission.studentId}">ID: 1</span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent-indigo); font-weight: 600;" th:text="${row.assignment != null ? row.assignment.title : 'Assignment #' + row.submission.assignmentId}">Assignment Title</div>
+                        </div>
+                        <div>
+                            <span th:if="${row.grade != null}" style="font-size: 12px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 4px 10px; border-radius: 6px; font-weight: 700;">
+                                <i class="fa-solid fa-check"></i> Graded: <span th:text="${row.grade.score} + '/' + ${row.grade.maxScore}">95/100</span>
+                            </span>
+                            <span th:unless="${row.grade != null}" style="font-size: 12px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                <i class="fa-regular fa-clock"></i> Pending Grade
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">Submitted Answer / Work:</div>
+                        <div style="font-size: 13px; color: #cbd5e1; white-space: pre-wrap;" th:text="${row.submission.content}">Content</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;" th:text="'Submitted at: ' + ${row.submission.submittedAt}">Date</div>
+                    </div>
+
+                    <!-- Grading Form -->
+                    <form th:action="@{/instructor/grade-submission}" method="POST" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px;">
+                        <input type="hidden" name="submissionId" th:value="${row.submission.submissionId}">
+                        <div style="display: grid; grid-template-columns: 140px 140px 1fr 140px; gap: 12px; align-items: flex-end;">
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Score Awarded</label>
+                                <input type="number" name="score" th:value="${row.grade != null ? row.grade.score : 90}" class="form-control" min="0" max="100" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 13px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Max Score</label>
+                                <input type="number" name="maxScore" th:value="${row.grade != null ? row.grade.maxScore : 100}" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 13px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Instructor Feedback</label>
+                                <input type="text" name="feedback" th:value="${row.grade != null ? row.grade.feedback : 'Good effort, well executed.'}" class="form-control" placeholder="Feedback to student..." style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: #fff; font-size: 13px;">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save Grade
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Attempts -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-brain"></i> Student Quiz Attempts</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(quizAttempts)}" style="padding: 30px; text-align: center; color: var(--text-muted);">
+                    No student quiz attempts recorded.
+                </div>
+
+                <table th:unless="${#lists.isEmpty(quizAttempts)}" class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Quiz ID</th>
+                            <th>Score Awarded</th>
+                            <th>Percentage</th>
+                            <th>Submitted Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="qa : ${quizAttempts}">
+                            <td><strong style="color: #fff;" th:text="${qa.studentName}">Alex Johnson</strong></td>
+                            <td th:text="'Quiz #' + ${qa.quizId}">Quiz #1</td>
+                            <td th:text="${qa.score} + ' / ' + ${qa.totalMarks}">100 / 100</td>
+                            <td><span style="font-weight: 700; color: #10b981;" th:text="${qa.percentage} + '%'">100%</span></td>
+                            <td style="color: var(--text-muted); font-size: 12px;" th:text="${qa.submittedAt}">Date</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,24 +1,33 @@
 package com.lms.web;
 
 import com.lms.admin.*;
+import com.lms.common.SecurityHelper;
 import com.lms.course.Course;
 import com.lms.course.CourseRepository;
 import com.lms.course.CourseStatus;
 import com.lms.instructor.InstructorProfile;
 import com.lms.instructor.InstructorProfileRepository;
+import com.lms.student.Enrollment;
+import com.lms.student.EnrollmentRepository;
 import com.lms.student.StudentProfile;
 import com.lms.student.StudentProfileRepository;
-import com.lms.student.EnrollmentRepository;
+import com.lms.user.User;
+import com.lms.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminWebController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private StudentProfileRepository studentProfileRepository;
@@ -38,33 +47,39 @@ public class AdminWebController {
     @Autowired
     private PlatformSettingRepository platformSettingRepository;
 
+    @Autowired
+    private SecurityHelper securityHelper;
+
+    private User getAuthenticatedAdmin(HttpSession session) {
+        if (!securityHelper.hasAnyRole(session, "ADMIN")) {
+            return null;
+        }
+        return securityHelper.getCurrentUser(session);
+    }
+
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
-        long totalStudents = studentProfileRepository.count();
-        long totalInstructors = instructorProfileRepository.count();
+    public String adminDashboard(HttpSession session, Model model) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        long totalStudents = userRepository.countByRole("STUDENT");
+        long totalInstructors = userRepository.countByRole("INSTRUCTOR");
         long totalCourses = courseRepository.count();
         long publishedCourses = courseRepository.countByStatus(CourseStatus.PUBLISHED);
         long pendingCourses = courseRepository.countByStatus(CourseStatus.DRAFT);
         long totalEnrollments = enrollmentRepository.count();
 
-        model.addAttribute("totalStudents", totalStudents > 0 ? totalStudents : 1);
-        model.addAttribute("totalInstructors", totalInstructors > 0 ? totalInstructors : 1);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("totalInstructors", totalInstructors);
         model.addAttribute("totalCourses", totalCourses);
         model.addAttribute("publishedCourses", publishedCourses);
         model.addAttribute("pendingCourses", pendingCourses);
         model.addAttribute("totalEnrollments", totalEnrollments);
 
-        // Add Users list
-        List<AdminUserDto> userList = new ArrayList<>();
-        for (StudentProfile s : studentProfileRepository.findAll()) {
-            userList.add(new AdminUserDto(s.getId(), s.getName(), s.getEmail(), "STUDENT", s.getStatus()));
-        }
-        for (InstructorProfile i : instructorProfileRepository.findAll()) {
-            userList.add(new AdminUserDto(i.getId(), i.getName(), i.getEmail(), "INSTRUCTOR", i.getStatus()));
-        }
+        List<User> userList = userRepository.findAll();
         model.addAttribute("users", userList);
 
-        // Add Courses list
         List<Map<String, Object>> courseList = new ArrayList<>();
         for (Course c : courseRepository.findAll()) {
             Map<String, Object> map = new HashMap<>();
@@ -78,55 +93,200 @@ public class AdminWebController {
         }
         model.addAttribute("courses", courseList);
 
-        // Logs
         List<ActivityLog> logs = activityLogRepository.findAllByOrderByTimestampDesc();
         model.addAttribute("logs", logs);
+
+        List<PlatformSetting> settings = platformSettingRepository.findAll();
+        model.addAttribute("settings", settings);
 
         return "admin-dashboard";
     }
 
     @PostMapping("/users/create")
-    public String createUser(@RequestParam String name, @RequestParam String email, @RequestParam String role) {
-        if ("INSTRUCTOR".equalsIgnoreCase(role)) {
-            Long nextId = System.currentTimeMillis() % 10000;
-            InstructorProfile ip = new InstructorProfile(nextId, name, email, "Computer Science", "Instructor", "ACTIVE");
-            instructorProfileRepository.save(ip);
-        } else {
-            Long nextId = System.currentTimeMillis() % 10000;
-            StudentProfile sp = new StudentProfile(nextId, name, email, "Student", "ACTIVE");
-            studentProfileRepository.save(sp);
+    public String createUser(@RequestParam String name,
+                             @RequestParam String email,
+                             @RequestParam String role,
+                             @RequestParam(defaultValue = "password123") String password,
+                             @RequestParam(required = false) String department,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        if (userRepository.findByEmailIgnoreCase(email.trim()).isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "User with email " + email + " already exists.");
+            return "redirect:/admin/dashboard";
         }
-        activityLogRepository.save(new ActivityLog("Admin", "Created User Account", name + " (" + role + ")"));
+
+        String normRole = role.toUpperCase();
+        User newUser = new User(email.trim(), password.trim(), name.trim(), normRole, department);
+        newUser = userRepository.save(newUser);
+
+        if ("INSTRUCTOR".equals(normRole)) {
+            instructorProfileRepository.save(new InstructorProfile(newUser.getId(), name, email, department != null ? department : "General", "Instructor", "Active"));
+        } else if ("STUDENT".equals(normRole)) {
+            studentProfileRepository.save(new StudentProfile(newUser.getId(), name, email, "Student", "Active"));
+        }
+
+        securityHelper.logActivity("Admin (" + currentUser.getFullName() + ")", "Created User Account", name + " (" + normRole + ") in SQLite");
+        redirectAttributes.addFlashAttribute("successMessage", "User account created! Email: " + email + " (Default password: " + password + ")");
+
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/users/toggle-status")
+    public String toggleUserStatus(@RequestParam Long id,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        userRepository.findById(id).ifPresent(user -> {
+            if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
+                user.setStatus("INACTIVE");
+            } else {
+                user.setStatus("ACTIVE");
+            }
+            userRepository.save(user);
+            securityHelper.logActivity("Admin", "Toggled User Status", user.getFullName() + " -> " + user.getStatus());
+            redirectAttributes.addFlashAttribute("successMessage", "User status changed to " + user.getStatus());
+        });
+
         return "redirect:/admin/dashboard";
     }
 
     @PostMapping("/users/delete")
-    public String deleteUser(@RequestParam String role, @RequestParam Long id) {
-        if ("INSTRUCTOR".equalsIgnoreCase(role)) {
-            instructorProfileRepository.deleteById(id);
-        } else {
-            studentProfileRepository.deleteById(id);
-        }
-        activityLogRepository.save(new ActivityLog("Admin", "Deleted User Account", "User #" + id));
+    public String deleteUser(@RequestParam Long id,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        userRepository.findById(id).ifPresent(user -> {
+            userRepository.delete(user);
+            if ("STUDENT".equalsIgnoreCase(user.getRole())) {
+                studentProfileRepository.deleteById(id);
+            } else if ("INSTRUCTOR".equalsIgnoreCase(user.getRole())) {
+                instructorProfileRepository.deleteById(id);
+            }
+            securityHelper.logActivity("Admin", "Deleted User Account", user.getFullName() + " (" + user.getEmail() + ")");
+            redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully from SQLite.");
+        });
+
         return "redirect:/admin/dashboard";
     }
 
     @PostMapping("/courses/toggle-status")
-    public String toggleCourseStatus(@RequestParam Long courseId, @RequestParam String status) {
+    public String toggleCourseStatus(@RequestParam Long courseId,
+                                     @RequestParam String status,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
         courseRepository.findById(courseId).ifPresent(c -> {
             c.setStatus(CourseStatus.valueOf(status));
             courseRepository.save(c);
-            activityLogRepository.save(new ActivityLog("Admin", "Changed Course Status to " + status, c.getTitle()));
+            securityHelper.logActivity("Admin", "Changed Course Status", c.getTitle() + " -> " + status);
+            redirectAttributes.addFlashAttribute("successMessage", "Course status updated.");
         });
+
         return "redirect:/admin/dashboard";
     }
 
     @PostMapping("/courses/delete")
-    public String deleteCourse(@RequestParam Long courseId) {
+    public String deleteCourse(@RequestParam Long courseId,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
         courseRepository.findById(courseId).ifPresent(c -> {
             courseRepository.deleteById(courseId);
-            activityLogRepository.save(new ActivityLog("Admin", "Deleted Course", c.getTitle()));
+            securityHelper.logActivity("Admin", "Deleted Course", c.getTitle());
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully.");
         });
+
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/users/edit")
+    public String editUser(@RequestParam Long id,
+                           @RequestParam String name,
+                           @RequestParam String email,
+                           @RequestParam String role,
+                           @RequestParam String status,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        userRepository.findById(id).ifPresent(user -> {
+            user.setFullName(name.trim());
+            user.setEmail(email.trim());
+            user.setRole(role.trim().toUpperCase());
+            user.setStatus(status.trim().toUpperCase());
+            userRepository.save(user);
+
+            if ("STUDENT".equalsIgnoreCase(user.getRole())) {
+                studentProfileRepository.findById(id).ifPresent(sp -> {
+                    sp.setName(user.getFullName());
+                    sp.setEmail(user.getEmail());
+                    sp.setStatus(user.getStatus());
+                    studentProfileRepository.save(sp);
+                });
+            } else if ("INSTRUCTOR".equalsIgnoreCase(user.getRole())) {
+                instructorProfileRepository.findById(id).ifPresent(ip -> {
+                    ip.setName(user.getFullName());
+                    ip.setEmail(user.getEmail());
+                    ip.setStatus(user.getStatus());
+                    instructorProfileRepository.save(ip);
+                });
+            }
+            securityHelper.logActivity("Admin (" + currentUser.getFullName() + ")", "Updated User Account", user.getFullName() + " (" + user.getRole() + ")");
+            redirectAttributes.addFlashAttribute("successMessage", "User updated successfully.");
+        });
+
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/enroll")
+    public String enrollStudent(@RequestParam Long studentId,
+                                @RequestParam Long courseId,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        if (!enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
+            enrollmentRepository.save(new Enrollment(studentId, courseId));
+            securityHelper.logActivity("Admin", "Enrolled Student", "Student #" + studentId + " -> Course #" + courseId);
+            redirectAttributes.addFlashAttribute("successMessage", "Student enrolled successfully into course!");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Student is already enrolled in this course.");
+        }
+
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/settings/save")
+    public String saveSettings(@RequestParam Map<String, String> allParams,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        User currentUser = getAuthenticatedAdmin(session);
+        if (currentUser == null) return "redirect:/login";
+
+        allParams.forEach((key, value) -> {
+            if (!key.startsWith("_") && !"save".equals(key)) {
+                PlatformSetting setting = platformSettingRepository.findById(key)
+                        .orElse(new PlatformSetting(key, value));
+                setting.setSettingValue(value);
+                platformSettingRepository.save(setting);
+            }
+        });
+        securityHelper.logActivity("Admin (" + currentUser.getFullName() + ")", "Updated System Settings", "Saved platform settings to SQLite");
+        redirectAttributes.addFlashAttribute("successMessage", "System settings saved successfully.");
+
         return "redirect:/admin/dashboard";
     }
 }

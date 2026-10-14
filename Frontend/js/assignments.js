@@ -1,6 +1,29 @@
 const ASSIGNMENTS_API_URL = "http://localhost:8080/api/student/assignments";
 const SUBMISSIONS_API_URL = "http://localhost:8080/api/student/submissions";
-const STUDENT_ID = 1;
+let CURRENT_STUDENT = null;
+
+async function getAuthStudent() {
+    if (CURRENT_STUDENT) return CURRENT_STUDENT;
+    try {
+        const res = await fetch("http://localhost:8080/api/student/current");
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.authenticated) {
+                CURRENT_STUDENT = data;
+                sessionStorage.setItem("currentStudent", JSON.stringify(data));
+                return data;
+            }
+        }
+    } catch (e) {}
+    const cached = sessionStorage.getItem("currentStudent");
+    if (cached) {
+        try {
+            CURRENT_STUDENT = JSON.parse(cached);
+            return CURRENT_STUDENT;
+        } catch (e) {}
+    }
+    return { id: 1, name: "Student" };
+}
 
 function escapeHtml(value) {
     return String(value)
@@ -58,50 +81,53 @@ function renderAssignment(assignment) {
     const feedback = assignment.feedback
         ? `
             <section class="feedback-panel">
-                <h3><i class="fa-solid fa-comment-dots"></i> Instructor Feedback</h3>
+                <h3>Instructor feedback</h3>
                 <p>${escapeHtml(assignment.feedback)}</p>
             </section>`
         : "";
 
-    const isNotSubmitted = String(rawStatus).toLowerCase() === "not submitted";
+    const submissionMeta = assignment.submittedAt
+        ? `<span><strong>Submitted:</strong> ${escapeHtml(formatDate(assignment.submittedAt))}</span>`
+        : "";
 
-    const submissionForm = isNotSubmitted
+    const submissionForm = rawStatus === "Not submitted"
         ? `
             <form class="submission-form" data-assignment-id="${escapeHtml(assignment.assignmentId)}">
                 <label for="submission-${escapeHtml(assignment.assignmentId)}">
-                    <i class="fa-solid fa-pen-to-square"></i> Your Submission or File Link
+                    Submit work
                 </label>
                 <textarea
                     id="submission-${escapeHtml(assignment.assignmentId)}"
                     name="submissionFile"
-                    maxlength="500"
+                    rows="3"
+                    placeholder="Enter your submission answers, repository link, or text..."
                     required
-                    placeholder="Type your response or paste a shareable Google Drive / GitHub repository link..."
                 ></textarea>
-                <div class="submission-form-footer">
-                    <span class="submission-limit"><i class="fa-solid fa-circle-info"></i> Text or link only · up to 500 characters</span>
-                    <button class="submit-button" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Assignment</button>
+                <div class="form-actions">
+                    <button class="primary-button" type="submit">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Assignment
+                    </button>
+                    <span class="submission-message" role="status" aria-live="polite"></span>
                 </div>
-                <p class="submission-message" role="status" aria-live="polite"></p>
             </form>`
-        : `<p class="submission-notice"><i class="fa-solid fa-circle-check"></i> Submitted on ${escapeHtml(formatDate(assignment.submittedAt))}</p>`;
+        : "";
 
     return `
-        <article class="assignment-card" data-assignment-id="${escapeHtml(assignment.assignmentId)}">
-            <div class="assignment-topline">
+        <article class="assignment-card">
+            <div class="assignment-header">
                 <div>
-                    <span class="course-name"><i class="fa-solid fa-book"></i> ${courseName}</span>
+                    <span class="course-name"><i class="fa-solid fa-graduation-cap"></i> ${courseName}</span>
                     <h2>${title}</h2>
                 </div>
-                <span class="status-badge${statusClass}">${statusIcon} ${statusText}</span>
+                <div class="header-status">
+                    <span class="status-badge${statusClass}">${statusIcon} ${statusText}</span>
+                    <strong class="assignment-marks">${marks}</strong>
+                </div>
             </div>
-            <div class="assignment-description">${description}</div>
+            <p class="assignment-description">${description}</p>
             <div class="assignment-meta">
-                <span><i class="fa-solid fa-calendar-day" style="color: #3b82f6;"></i> <strong>Due:</strong> ${escapeHtml(formatDate(assignment.dueDate))}</span>
-                <span><i class="fa-solid fa-trophy" style="color: #f59e0b;"></i> <strong>Marks:</strong> ${marks}</span>
-                ${assignment.submittedAt
-                    ? `<span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> <strong>Submitted:</strong> ${escapeHtml(formatDate(assignment.submittedAt))}</span>`
-                    : ""}
+                <span><strong>Due:</strong> ${escapeHtml(formatDate(assignment.dueDate))}</span>
+                ${submissionMeta}
             </div>
             ${feedback}
             ${submissionForm}
@@ -110,36 +136,34 @@ function renderAssignment(assignment) {
 
 async function getSubmissionError(response) {
     try {
-        const error = await response.json();
-        return error.detail || error.message || error.title
-            || `Submission failed (HTTP ${response.status}).`;
+        const problem = await response.json();
+        return problem?.detail || problem?.message || `Your assignment could not be submitted (HTTP ${response.status}).`;
     } catch {
-        return `Submission failed (HTTP ${response.status}).`;
+        return `Your assignment could not be submitted (HTTP ${response.status}).`;
     }
 }
 
 async function submitAssignment(event) {
-    const form = event.target.closest(".submission-form");
-    if (!form) {
-        return;
-    }
-
     event.preventDefault();
 
-    const submissionFile = form.elements.submissionFile.value.trim();
+    const form = event.currentTarget;
+    const button = form.querySelector("button[type='submit']");
     const message = form.querySelector(".submission-message");
-    const button = form.querySelector(".submit-button");
+    const submissionField = form.elements.namedItem("submissionFile");
+    const submissionFile = submissionField ? submissionField.value.trim() : "";
+
     if (!submissionFile) {
-        message.textContent = "Enter your response or a file reference first.";
-        message.classList.add("error");
+        message.textContent = "Please enter your submission response before submitting.";
+        message.className = "submission-message error";
         return;
     }
 
     button.disabled = true;
-    message.textContent = "Submitting…";
+    message.textContent = "Submitting work...";
     message.classList.remove("error", "success");
 
     try {
+        const student = await getAuthStudent();
         const response = await fetch(SUBMISSIONS_API_URL, {
             method: "POST",
             headers: {
@@ -147,7 +171,9 @@ async function submitAssignment(event) {
             },
             body: JSON.stringify({
                 assignmentId: Number(form.dataset.assignmentId),
-                studentId: STUDENT_ID,
+                studentId: student.id,
+                studentName: student.name,
+                content: submissionFile,
                 submissionFile
             })
         });
@@ -159,21 +185,13 @@ async function submitAssignment(event) {
         const savedSubmission = await response.json();
         const card = form.closest(".assignment-card");
         const badge = card.querySelector(".status-badge");
-        badge.textContent = savedSubmission.status || "submitted";
-        badge.className = `status-badge${getStatusClass(savedSubmission.status)}`;
-
-        if (savedSubmission.submittedAt) {
-            const submittedAt = document.createElement("span");
-            const label = document.createElement("strong");
-            label.textContent = "Submitted: ";
-            submittedAt.append(label, formatDate(savedSubmission.submittedAt));
-            card.querySelector(".assignment-meta").appendChild(submittedAt);
-        }
+        badge.textContent = savedSubmission.status || "Submitted";
+        badge.className = `status-badge status-submitted`;
 
         const successMessage = document.createElement("p");
         successMessage.className = "submission-notice";
-        successMessage.setAttribute("role", "status");
-        successMessage.textContent = "Your assignment was submitted successfully.";
+        successMessage.style.cssText = "color: #10b981; margin-top: 12px; font-weight: 600;";
+        successMessage.innerHTML = '<i class="fa-solid fa-circle-check"></i> Your assignment was submitted successfully.';
         form.replaceWith(successMessage);
     } catch (error) {
         console.error("Unable to submit assignment:", error);
@@ -185,12 +203,11 @@ async function submitAssignment(event) {
 
 async function loadAssignments() {
     const assignmentList = document.getElementById("assignment-list");
-    if (!assignmentList) {
-        return;
-    }
+    if (!assignmentList) return;
 
     try {
-        const response = await fetch(`${ASSIGNMENTS_API_URL}/${STUDENT_ID}`);
+        const student = await getAuthStudent();
+        const response = await fetch(`${ASSIGNMENTS_API_URL}/${student.id}`);
         if (!response.ok) {
             throw new Error(`Assignments could not be loaded (HTTP ${response.status}).`);
         }
@@ -209,6 +226,9 @@ async function loadAssignments() {
         }
 
         assignmentList.innerHTML = assignments.map(renderAssignment).join("");
+        document.querySelectorAll(".submission-form").forEach(form => {
+            form.addEventListener("submit", submitAssignment);
+        });
     } catch (error) {
         console.error("Unable to load student assignments:", error);
         assignmentList.innerHTML = `
@@ -218,11 +238,6 @@ async function loadAssignments() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const assignmentList = document.getElementById("assignment-list");
-    if (assignmentList) {
-        assignmentList.addEventListener("submit", submitAssignment);
-    }
-
+document.addEventListener("DOMContentLoaded", () => {
     loadAssignments();
 });

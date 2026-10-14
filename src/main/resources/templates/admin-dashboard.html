@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | LMS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/instructor.css}" href="/css/instructor.css">
-    <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<head th:replace="~{fragments/layout :: head('Admin Command Center | LMS Platform')}"></head>
 <body>
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">A</div>
-            <div class="brand-text">LMS Admin</div>
-        </div>
-        <nav class="nav-menu">
-            <a th:href="@{/admin/dashboard}" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-            <a th:href="@{/instructor/dashboard}" class="nav-item"><i class="fa-solid fa-user-tie"></i> Instructor Module</a>
-            <a th:href="@{/student/dashboard}" class="nav-item"><i class="fa-solid fa-graduation-cap"></i> Student Module</a>
-        </nav>
-    </aside>
+    <aside th:replace="~{fragments/layout :: sidebar('dashboard', 'ADMIN')}"></aside>
 
     <div class="main-wrapper">
-        <header class="header">
-            <div class="header-title">
-                <h1>Admin Command Center</h1>
-            </div>
-            <div class="user-badge"><i class="fa-solid fa-user-shield"></i> Logged in as System Admin</div>
-        </header>
+        <header th:replace="~{fragments/layout :: header('Admin Command Center', 'Logged in as ' + (${currentUser != null} ? ${currentUser.fullName} : 'Administrator'), ${currentUser}, 'Administrator')}"></header>
 
         <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Quick Action Command Bar -->
+            <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 14px; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-shield-halved" style="color: var(--accent-indigo);"></i> System Oversight & Administration
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">
+                        Manage all platform users, monitor courses, enroll students, and adjust system settings directly in SQLite.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-primary" onclick="openCreateUserModal()">
+                        <i class="fa-solid fa-user-plus"></i> Add User
+                    </button>
+                    <a th:href="@{/instructor/create-course}" class="btn btn-secondary">
+                        <i class="fa-solid fa-plus"></i> New Course
+                    </a>
+                    <button type="button" class="btn btn-secondary" onclick="openEnrollModal()">
+                        <i class="fa-solid fa-graduation-cap"></i> Quick Enroll
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
             <div class="metrics-grid">
                 <div class="metric-card">
-                    <h3>Total Students</h3>
+                    <h3>Registered Students</h3>
                     <div class="value" th:text="${totalStudents}">0</div>
                 </div>
                 <div class="metric-card">
-                    <h3>Total Instructors</h3>
+                    <h3>Instructors</h3>
                     <div class="value" style="color: #3b82f6;" th:text="${totalInstructors}">0</div>
                 </div>
                 <div class="metric-card">
@@ -58,86 +61,394 @@
                 </div>
             </div>
 
-            <!-- Users Table -->
-            <div class="card-section">
-                <div class="section-header">
-                    <h2><i class="fa-solid fa-users"></i> Platform Users</h2>
-                </div>
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Full Name</th>
-                            <th>Email Address</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="user : ${users}">
-                            <td th:text="'#' + ${user.id}">#1</td>
-                            <td th:text="${user.name}">John Doe</td>
-                            <td th:text="${user.email}">john@lms.com</td>
-                            <td>
-                                <span class="badge" th:classappend="${user.role == 'ADMIN' ? 'badge-published' : 'badge-draft'}" th:text="${user.role}">STUDENT</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-published" th:text="${user.status}">ACTIVE</span>
-                            </td>
-                            <td>
-                                <form th:action="@{/admin/users/delete}" method="post" style="display:inline;">
-                                    <input type="hidden" name="role" th:value="${user.role}">
-                                    <input type="hidden" name="id" th:value="${user.id}">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete user?');"><i class="fa-solid fa-trash"></i> Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Navigation Tabs / Section Anchors -->
+            <div style="display: flex; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <button type="button" class="btn btn-primary btn-sm admin-tab-btn active" onclick="showAdminSection('users-section', this)">
+                    <i class="fa-solid fa-users"></i> Users (<span th:text="${users != null ? users.size() : 0}">0</span>)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm admin-tab-btn" onclick="showAdminSection('courses-section', this)">
+                    <i class="fa-solid fa-book-open"></i> Courses (<span th:text="${courses != null ? courses.size() : 0}">0</span>)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm admin-tab-btn" onclick="showAdminSection('settings-section', this)">
+                    <i class="fa-solid fa-sliders"></i> Platform Settings
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm admin-tab-btn" onclick="showAdminSection('logs-section', this)">
+                    <i class="fa-solid fa-clipboard-list"></i> Activity Logs (<span th:text="${logs != null ? logs.size() : 0}">0</span>)
+                </button>
             </div>
 
-            <!-- Courses Table -->
-            <div class="card-section">
-                <div class="section-header">
-                    <h2><i class="fa-solid fa-book-open"></i> Platform Courses</h2>
+            <!-- SECTION 1: USER MANAGEMENT -->
+            <div id="users-section" class="admin-tab-pane">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-users"></i> User Directory & Permissions</h2>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openCreateUserModal()">
+                            <i class="fa-solid fa-user-plus"></i> Add User
+                        </button>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <input type="text" id="userFilterInput" class="form-control" placeholder="Search users by name or email..." onkeyup="filterUserTable()" style="flex: 1; min-width: 200px; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <select id="userRoleFilter" onchange="filterUserTable()" style="width: 180px; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                            <option value="">All Roles</option>
+                            <option value="STUDENT">Students</option>
+                            <option value="INSTRUCTOR">Instructors</option>
+                            <option value="ADMIN">Administrators</option>
+                        </select>
+                    </div>
+
+                    <table class="custom-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}" class="user-row" th:data-role="${user.role}">
+                                <td><strong style="color: #6366f1;">#<span th:text="${user.id}">1</span></strong></td>
+                                <td class="user-name"><strong style="color: #fff;" th:text="${user.fullName}">Name</strong></td>
+                                <td class="user-email" style="color: var(--text-muted);" th:text="${user.email}">email@domain.com</td>
+                                <td>
+                                    <span class="badge" th:classappend="${user.role == 'ADMIN' ? 'badge-danger' : (user.role == 'INSTRUCTOR' ? 'badge-primary' : 'badge-success')}" th:text="${user.role}">ROLE</span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="${user.status == 'ACTIVE' ? 'badge-success' : 'badge-warning'}" th:text="${user.status}">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="btn btn-secondary btn-sm"
+                                                th:data-id="${user.id}"
+                                                th:data-name="${user.fullName}"
+                                                th:data-email="${user.email}"
+                                                th:data-role="${user.role}"
+                                                th:data-status="${user.status}"
+                                                onclick="handleEditBtn(this)">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </button>
+                                        <form th:action="@{/admin/users/toggle-status}" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="id" th:value="${user.id}">
+                                            <button type="submit" class="btn btn-secondary btn-sm" th:text="${user.status == 'ACTIVE' ? 'Deactivate' : 'Activate'}">Toggle</button>
+                                        </form>
+                                        <form th:if="${user.role != 'ADMIN'}" th:action="@{/admin/users/delete}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this user from SQLite?');">
+                                            <input type="hidden" name="id" th:value="${user.id}">
+                                            <button type="submit" class="btn btn-sm" title="Delete User" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 6px; cursor: pointer; padding: 6px 10px;">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Course Title</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Enrollments</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="c : ${courses}">
-                            <td th:text="'#' + ${c.courseId}">#1</td>
-                            <td th:text="${c.title}">Course Title</td>
-                            <td th:text="${c.category}">Computer Science</td>
-                            <td>
-                                <span class="badge" th:classappend="${c.status == 'PUBLISHED' ? 'badge-published' : 'badge-draft'}" th:text="${c.status}">PUBLISHED</span>
-                            </td>
-                            <td th:text="${c.enrollmentCount} + ' Students'">0 Students</td>
-                            <td>
-                                <form th:action="@{/admin/courses/toggle-status}" method="post" style="display:inline;">
-                                    <input type="hidden" name="courseId" th:value="${c.courseId}">
-                                    <input type="hidden" name="status" th:value="${c.status == 'DRAFT' ? 'PUBLISHED' : 'DRAFT'}">
-                                    <button type="submit" class="btn btn-secondary btn-sm" th:text="${c.status == 'DRAFT' ? 'Publish' : 'Unpublish'}">Toggle</button>
-                                </form>
-                                <form th:action="@{/admin/courses/delete}" method="post" style="display:inline;">
-                                    <input type="hidden" name="courseId" th:value="${c.courseId}">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete course?');"><i class="fa-solid fa-trash"></i> Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
+
+            <!-- SECTION 2: COURSE MANAGEMENT -->
+            <div id="courses-section" class="admin-tab-pane" style="display: none;">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-book-open"></i> Platform Course Oversight</h2>
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/instructor/create-course}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Course</a>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="openEnrollModal()"><i class="fa-solid fa-user-plus"></i> Enroll Student</button>
+                        </div>
+                    </div>
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Active Enrollments</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${courses}">
+                                <td><strong style="color: #6366f1;">#<span th:text="${c.courseId}">1</span></strong></td>
+                                <td><strong style="color: #fff;" th:text="${c.title}">Title</strong></td>
+                                <td th:text="${c.category}">Category</td>
+                                <td>
+                                    <span class="badge" th:classappend="${c.status == 'PUBLISHED' ? 'badge-success' : 'badge-warning'}" th:text="${c.status}">STATUS</span>
+                                </td>
+                                <td><span style="font-weight: 600; color: #8b5cf6;" th:text="${c.enrollmentCount}">0</span> students</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px;">
+                                        <a th:href="@{/instructor/manage-courses}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-gear"></i> Manage</a>
+                                        <form th:action="@{/admin/courses/toggle-status}" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="courseId" th:value="${c.courseId}">
+                                            <input type="hidden" name="status" th:value="${c.status == 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'}">
+                                            <button type="submit" class="btn btn-secondary btn-sm" th:text="${c.status == 'PUBLISHED' ? 'Unpublish' : 'Publish'}">Toggle</button>
+                                        </form>
+                                        <form th:action="@{/admin/courses/delete}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete course from SQLite?');">
+                                            <input type="hidden" name="courseId" th:value="${c.courseId}">
+                                            <button type="submit" class="btn btn-sm" title="Delete Course" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 6px; cursor: pointer; padding: 6px 10px;">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 3: SYSTEM SETTINGS -->
+            <div id="settings-section" class="admin-tab-pane" style="display: none;">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-sliders"></i> Platform Configuration & Security</h2>
+                    </div>
+
+                    <form th:action="@{/admin/settings/save}" method="POST">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Platform Name</label>
+                                <input type="text" name="platform_name" class="form-control" value="Online Learning Management System" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Admin Contact Email</label>
+                                <input type="email" name="contact_email" class="form-control" value="admin@lms.com" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Student Registration</label>
+                                <select name="allow_registration" class="form-control" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                                    <option value="true">Open (Anyone can register)</option>
+                                    <option value="false">Closed (Admin Invite Only)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Course Auto-Publish</label>
+                                <select name="auto_publish" class="form-control" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                                    <option value="false">Requires Review (Draft by default)</option>
+                                    <option value="true">Instant (Immediate publishing)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px;">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save System Configuration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SECTION 4: AUDIT LOGS -->
+            <div id="logs-section" class="admin-tab-pane" style="display: none;">
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-clipboard-list"></i> Real-time Activity Logs (SQLite)</h2>
+                    </div>
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${logs}">
+                                <td style="color: var(--text-muted); font-size: 12px;" th:text="${log.timestamp}">Time</td>
+                                <td><strong style="color: #fff;" th:text="${log.userName}">User</strong></td>
+                                <td><span class="badge badge-primary" th:text="${log.action}">Action</span></td>
+                                <td style="color: #cbd5e1;" th:text="${log.details}">Details</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
+
+    <!-- MODAL: CREATE USER -->
+    <div id="createUserModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 16px; max-width: 480px; width: 90%; margin: 80px auto; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; font-size: 18px; font-weight: 700;"><i class="fa-solid fa-user-plus" style="color: var(--accent-indigo);"></i> Create User Account</h3>
+                <button type="button" onclick="closeCreateUserModal()" style="background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer;">&times;</button>
+            </div>
+            <form th:action="@{/admin/users/create}" method="POST">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Maria Gonzalez" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="user@lms.com" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Password</label>
+                    <input type="password" name="password" class="form-control" value="password123" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Account Role</label>
+                    <select name="role" class="form-control" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <option value="STUDENT">Student</option>
+                        <option value="INSTRUCTOR">Instructor</option>
+                        <option value="ADMIN">Administrator</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeCreateUserModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User in SQLite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT USER -->
+    <div id="editUserModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 16px; max-width: 480px; width: 90%; margin: 80px auto; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; font-size: 18px; font-weight: 700;"><i class="fa-solid fa-user-pen" style="color: var(--accent-indigo);"></i> Edit User Account</h3>
+                <button type="button" onclick="closeEditUserModal()" style="background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer;">&times;</button>
+            </div>
+            <form th:action="@{/admin/users/edit}" method="POST">
+                <input type="hidden" id="editUserId" name="id">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Full Name</label>
+                    <input type="text" id="editUserName" name="name" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Email Address</label>
+                    <input type="email" id="editUserEmail" name="email" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Account Role</label>
+                    <select id="editUserRole" name="role" class="form-control" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <option value="STUDENT">Student</option>
+                        <option value="INSTRUCTOR">Instructor</option>
+                        <option value="ADMIN">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Account Status</label>
+                    <select id="editUserStatus" name="status" class="form-control" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditUserModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ENROLL STUDENT -->
+    <div id="enrollModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 16px; max-width: 480px; width: 90%; margin: 80px auto; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; font-size: 18px; font-weight: 700;"><i class="fa-solid fa-graduation-cap" style="color: var(--accent-indigo);"></i> Enroll Student</h3>
+                <button type="button" onclick="closeEnrollModal()" style="background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer;">&times;</button>
+            </div>
+            <form th:action="@{/admin/enroll}" method="POST">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Select Student</label>
+                    <select name="studentId" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <option th:each="u : ${users}" th:if="${u.role == 'STUDENT'}" th:value="${u.id}" th:text="${u.fullName + ' (' + u.email + ')'}">Student</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Select Course</label>
+                    <select name="courseId" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        <option th:each="c : ${courses}" th:value="${c.courseId}" th:text="${c.title + ' (' + c.status + ')'}">Course</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEnrollModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Enroll in SQLite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openCreateUserModal() {
+            const m = document.getElementById('createUserModal');
+            if (m) m.style.display = 'block';
+        }
+        function closeCreateUserModal() {
+            const m = document.getElementById('createUserModal');
+            if (m) m.style.display = 'none';
+        }
+
+        function handleEditBtn(btn) {
+            openEditUserModal(
+                btn.getAttribute('data-id'),
+                btn.getAttribute('data-name'),
+                btn.getAttribute('data-email'),
+                btn.getAttribute('data-role'),
+                btn.getAttribute('data-status')
+            );
+        }
+
+        function openEditUserModal(id, name, email, role, status) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserName').value = name;
+            document.getElementById('editUserEmail').value = email;
+            document.getElementById('editUserRole').value = role;
+            document.getElementById('editUserStatus').value = status;
+            const m = document.getElementById('editUserModal');
+            if (m) m.style.display = 'block';
+        }
+        function closeEditUserModal() {
+            const m = document.getElementById('editUserModal');
+            if (m) m.style.display = 'none';
+        }
+
+        function openEnrollModal() {
+            const m = document.getElementById('enrollModal');
+            if (m) m.style.display = 'block';
+        }
+        function closeEnrollModal() {
+            const m = document.getElementById('enrollModal');
+            if (m) m.style.display = 'none';
+        }
+
+        function showAdminSection(sectionId, btn) {
+            document.querySelectorAll('.admin-tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-tab-btn').forEach(el => {
+                el.classList.remove('btn-primary');
+                el.classList.add('btn-secondary');
+            });
+            const target = document.getElementById(sectionId);
+            if (target) target.style.display = 'block';
+            if (btn) {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            }
+        }
+
+        function filterUserTable() {
+            const query = document.getElementById('userFilterInput').value.toLowerCase();
+            const role = document.getElementById('userRoleFilter').value;
+            const rows = document.querySelectorAll('#usersTable tbody tr');
+
+            rows.forEach(row => {
+                const name = row.querySelector('.user-name').textContent.toLowerCase();
+                const email = row.querySelector('.user-email').textContent.toLowerCase();
+                const rowRole = row.getAttribute('data-role');
+
+                const matchesQuery = name.includes(query) || email.includes(query);
+                const matchesRole = !role || rowRole === role;
+
+                row.style.display = (matchesQuery && matchesRole) ? '' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>

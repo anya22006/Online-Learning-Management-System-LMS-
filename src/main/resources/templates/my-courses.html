@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Courses | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('courses', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('My Enrolled Courses', 'Courses you are actively learning', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div th:if="${#lists.isEmpty(enrolledCourses)}" style="padding: 60px 20px; text-align: center; background: #111827; border: 1px dashed var(--border-color); border-radius: 16px;">
+                <i class="fa-solid fa-graduation-cap" style="font-size: 48px; color: #6366f1; margin-bottom: 16px;"></i>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">No Courses Enrolled Yet</h3>
+                <p style="color: var(--text-muted); font-size: 14px; max-width: 400px; margin: 0 auto 20px;">Explore our catalog of Java, Spring Boot, and Web Development courses and start learning today!</p>
+                <a th:href="@{/student/catalog}" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Browse Catalog</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;" th:unless="${#lists.isEmpty(enrolledCourses)}">
+                <div style="background: #111827; border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;" th:each="c : ${enrolledCourses}">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <span style="font-size: 11px; background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 4px 8px; border-radius: 6px; font-weight: 600;" th:text="${c.category}">Web Dev</span>
+                            <span style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 4px 8px; border-radius: 6px; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> Enrolled</span>
+                        </div>
+                        <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #fff;" th:text="${c.title}">Course Title</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;" th:text="${c.description}">Description</p>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; color: var(--text-muted);"><i class="fa-solid fa-circle-play" style="color: #6366f1;"></i> SQLite Persisted</span>
+                        <a th:href="@{'/student/course/' + ${c.courseId}}" class="btn btn-primary btn-sm" style="text-decoration: none; padding: 6px 14px; border-radius: 6px;">
+                            View Lessons <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

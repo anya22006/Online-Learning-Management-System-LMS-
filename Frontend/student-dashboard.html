@@ -20,12 +20,13 @@
         <nav class="nav-menu">
             <a href="student-dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard Overview</a>
             <a href="my-courses.html" class="nav-item"><i class="fa-solid fa-book-open"></i> My Courses</a>
+            <a href="course-catalog.html" class="nav-item"><i class="fa-solid fa-compass"></i> Course Catalog</a>
             <a href="my-assignments.html" class="nav-item"><i class="fa-solid fa-pen-to-square"></i> Assignments</a>
             <a href="my-grades.html" class="nav-item"><i class="fa-solid fa-award"></i> My Grades</a>
             <a href="my-quizzes.html" class="nav-item"><i class="fa-solid fa-brain"></i> Quizzes</a>
             <a href="my-progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> My Progress</a>
             <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
-            <a href="#" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="/logout" class="nav-item logout" style="color: #fda4af;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
         </nav>
     </aside>
 
@@ -36,11 +37,12 @@
                 <h1>Student Dashboard</h1>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">Welcome back, <span id="dashboard-name" style="color: #fff; font-weight: 600;">Student</span></p>
             </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
                 <div class="notification" title="Notifications" style="cursor: pointer;">
                     <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--text-muted);"></i>
                 </div>
                 <div class="user-badge"><i class="fa-solid fa-graduation-cap"></i> Logged in as Student</div>
+                <a href="/logout" class="btn btn-secondary btn-sm" style="color: #fda4af; border-color: rgba(244, 63, 94, 0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
             </div>
         </header>
 
@@ -65,7 +67,7 @@
                 </div>
                 <div class="metric-card">
                     <h3>Pending Assignments</h3>
-                    <div class="value" id="dashboard-pending-count" style="color: var(--accent-amber);">0</div>
+                    <div class="value" id="dashboard-pending-assignments" style="color: var(--accent-amber);">—</div>
                 </div>
                 <div class="metric-card">
                     <h3>Overall Progress</h3>
@@ -73,7 +75,7 @@
                 </div>
                 <div class="metric-card">
                     <h3>Average Grade</h3>
-                    <div class="value" style="color: #3b82f6;">90.0%</div>
+                    <div class="value" id="dashboard-avg-grade" style="color: #3b82f6;">—</div>
                 </div>
             </section>
 
@@ -83,7 +85,7 @@
                 <!-- MY COURSES SECTION -->
                 <div class="card-section">
                     <div class="section-header">
-                        <h2><i class="fa-solid fa-book-open" style="color: var(--accent-indigo);"></i> My Active Enrolled Courses</h2>
+                        <h2><i class="fa-solid fa-book-open"></i> My Active Enrolled Courses</h2>
                         <a href="my-courses.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> View All</a>
                     </div>
                     <div class="course-list" id="dashboard-course-list" aria-live="polite">
@@ -97,27 +99,23 @@
                     <!-- UPCOMING ASSIGNMENTS -->
                     <div class="card-section">
                         <div class="section-header">
-                            <h2><i class="fa-solid fa-file-pen" style="color: var(--accent-amber);"></i> Assignments</h2>
+                            <h2><i class="fa-solid fa-file-pen"></i> Assignments</h2>
                             <a href="my-assignments.html" class="btn btn-secondary btn-sm">View All</a>
                         </div>
-                        <div id="dashboard-assignments-list">
-                            <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
-                                Loading assignments...
-                            </p>
-                        </div>
+                        <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
+                            Open Assignments to view pending submissions and due dates.
+                        </p>
                     </div>
 
                     <!-- RECENT GRADES -->
                     <div class="card-section">
                         <div class="section-header">
-                            <h2><i class="fa-solid fa-award" style="color: var(--accent-emerald);"></i> Recent Grades</h2>
+                            <h2><i class="fa-solid fa-award"></i> Recent Grades</h2>
                             <a href="my-grades.html" class="btn btn-secondary btn-sm">View All</a>
                         </div>
-                        <div id="dashboard-grades-list">
-                            <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
-                                Loading grades...
-                            </p>
-                        </div>
+                        <p class="dashboard-empty-state" style="color: var(--text-muted); font-size: 0.95rem;">
+                            Open Grades to view your scored assignments & feedback.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -125,11 +123,11 @@
             <!-- RECENT ACTIVITY -->
             <div class="card-section">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-clock-rotate-left" style="color: #3b82f6;"></i> Recent Activity</h2>
+                    <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h2>
                 </div>
-                <div id="dashboard-activity-list">
+                <div class="activity-list">
                     <p class="dashboard-empty-state" style="color: var(--text-muted);">
-                        Loading recent activity...
+                        No activity summary is available yet.
                     </p>
                 </div>
             </div>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Academic Progress | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('progress', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Academic Progress', 'Your learning milestones and completion analytics in SQLite', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 24px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Enrolled Courses</h3>
+                    <div class="value" style="color: var(--accent-indigo);" th:text="${enrolledCount}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Assignments Submitted</h3>
+                    <div class="value" style="color: var(--accent-amber);" th:text="${submissionsCount}">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Quizzes Attempted</h3>
+                    <div class="value" style="color: var(--accent-emerald);" th:text="${quizAttemptsCount}">0</div>
+                </div>
+            </div>
+
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-chart-pie"></i> Learning Summary</h2>
+                </div>
+                <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                    All your course completions, quizzes, and assignment submissions are tracked in real-time in the SQLite database (<code style="background: #090d16; padding: 2px 6px; border-radius: 4px; color: #10b981;">lms.db</code>).
+                </p>
+                <div style="margin-top: 18px; display: flex; gap: 12px;">
+                    <a th:href="@{/student/my-courses}" class="btn btn-primary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600;">View Courses</a>
+                    <a th:href="@{/student/my-grades}" class="btn btn-secondary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600;">View Grades</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

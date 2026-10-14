@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Shared Head Fragment -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">LMS Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/instructor.css}" href="/css/instructor.css">
+    <link rel="stylesheet" th:href="@{/css/student.css}" href="/css/student.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body, * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .btn-logout {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover {
+            background: #f43f5e;
+            color: #fff;
+        }
+        .db-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .alert-toast {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .alert-toast-err {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Shared Role-Aware Sidebar Fragment -->
+<aside th:fragment="sidebar(activeItem, userRole)" class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">L</div>
+        <div class="brand-text">LMS Portal</div>
+    </div>
+
+    <!-- Student Navigation -->
+    <nav th:if="${userRole == 'STUDENT' || userRole == null}" class="nav-menu">
+        <a th:href="@{/student/dashboard}" class="nav-item" th:classappend="${activeItem == 'dashboard' ? 'active' : ''}">
+            <i class="fa-solid fa-house"></i> Dashboard Overview
+        </a>
+        <a th:href="@{/student/my-courses}" class="nav-item" th:classappend="${activeItem == 'courses' ? 'active' : ''}">
+            <i class="fa-solid fa-book-open"></i> My Courses
+        </a>
+        <a th:href="@{/student/catalog}" class="nav-item" th:classappend="${activeItem == 'catalog' ? 'active' : ''}">
+            <i class="fa-solid fa-compass"></i> Course Catalog
+        </a>
+        <a th:href="@{/student/my-assignments}" class="nav-item" th:classappend="${activeItem == 'assignments' ? 'active' : ''}">
+            <i class="fa-solid fa-pen-to-square"></i> Assignments
+        </a>
+        <a th:href="@{/student/my-quizzes}" class="nav-item" th:classappend="${activeItem == 'quizzes' ? 'active' : ''}">
+            <i class="fa-solid fa-brain"></i> Quizzes
+        </a>
+        <a th:href="@{/student/my-grades}" class="nav-item" th:classappend="${activeItem == 'grades' ? 'active' : ''}">
+            <i class="fa-solid fa-award"></i> My Grades
+        </a>
+        <a th:href="@{/student/my-progress}" class="nav-item" th:classappend="${activeItem == 'progress' ? 'active' : ''}">
+            <i class="fa-solid fa-chart-line"></i> My Progress
+        </a>
+        <a th:href="@{/student/settings}" class="nav-item" th:classappend="${activeItem == 'settings' ? 'active' : ''}">
+            <i class="fa-solid fa-gear"></i> Settings
+        </a>
+    </nav>
+
+    <!-- Instructor Navigation -->
+    <nav th:if="${userRole == 'INSTRUCTOR'}" class="nav-menu">
+        <a th:href="@{/instructor/dashboard}" class="nav-item" th:classappend="${activeItem == 'dashboard' ? 'active' : ''}">
+            <i class="fa-solid fa-chart-line"></i> Dashboard Overview
+        </a>
+        <a th:href="@{/instructor/manage-courses}" class="nav-item" th:classappend="${activeItem == 'manage-courses' ? 'active' : ''}">
+            <i class="fa-solid fa-book-open"></i> Manage Courses
+        </a>
+        <a th:href="@{/instructor/create-course}" class="nav-item" th:classappend="${activeItem == 'create-course' ? 'active' : ''}">
+            <i class="fa-solid fa-folder-plus"></i> Create Course
+        </a>
+        <a th:href="@{/instructor/create-assignment}" class="nav-item" th:classappend="${activeItem == 'create-assignment' ? 'active' : ''}">
+            <i class="fa-solid fa-pen-to-square"></i> Create Quiz & Assignment
+        </a>
+        <a th:href="@{/instructor/grade-submissions}" class="nav-item" th:classappend="${activeItem == 'grade-submissions' ? 'active' : ''}">
+            <i class="fa-solid fa-award"></i> Grade Submissions
+        </a>
+    </nav>
+
+    <!-- Admin Navigation -->
+    <nav th:if="${userRole == 'ADMIN'}" class="nav-menu">
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px 4px;">Administration</div>
+        <a th:href="@{/admin/dashboard}" class="nav-item" th:classappend="${activeItem == 'dashboard' ? 'active' : ''}">
+            <i class="fa-solid fa-chart-line"></i> Command Center
+        </a>
+
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px 4px;">Course Management</div>
+        <a th:href="@{/instructor/manage-courses}" class="nav-item" th:classappend="${activeItem == 'manage-courses' ? 'active' : ''}">
+            <i class="fa-solid fa-book-open"></i> Manage Courses
+        </a>
+        <a th:href="@{/instructor/create-course}" class="nav-item" th:classappend="${activeItem == 'create-course' ? 'active' : ''}">
+            <i class="fa-solid fa-folder-plus"></i> Create Course
+        </a>
+        <a th:href="@{/instructor/create-assignment}" class="nav-item" th:classappend="${activeItem == 'create-assignment' ? 'active' : ''}">
+            <i class="fa-solid fa-pen-to-square"></i> Quizzes & Assignments
+        </a>
+        <a th:href="@{/instructor/grade-submissions}" class="nav-item" th:classappend="${activeItem == 'grade-submissions' ? 'active' : ''}">
+            <i class="fa-solid fa-award"></i> Grade Submissions
+        </a>
+
+        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px 4px;">Student View</div>
+        <a th:href="@{/student/catalog}" class="nav-item" th:classappend="${activeItem == 'catalog' ? 'active' : ''}">
+            <i class="fa-solid fa-compass"></i> Course Catalog
+        </a>
+        <a th:href="@{/student/dashboard}" class="nav-item" th:classappend="${activeItem == 'student' ? 'active' : ''}">
+            <i class="fa-solid fa-graduation-cap"></i> Student Dashboard
+        </a>
+    </nav>
+</aside>
+
+<!-- Shared Header Fragment -->
+<header th:fragment="header(title, subtitle, user, roleLabel)" class="header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="header-title">
+        <h1 th:text="${title}">Page Title</h1>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;" th:text="${subtitle}">Page Subtitle</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="db-pill"><i class="fa-solid fa-database"></i> SQLite: lms.db</span>
+        <div class="user-badge" style="margin-left: 0;">
+            <i class="fa-solid fa-user-check"></i>
+            <span th:text="${user != null ? user.fullName + ' (' + roleLabel + ')' : roleLabel}">User</span>
+        </div>
+        <a th:href="@{/logout}" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </div>
+</header>
+
+<!-- Shared Alerts Fragment -->
+<div th:fragment="alerts">
+    <div th:if="${successMessage}" class="alert-toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${successMessage}">Operation successful!</span>
+    </div>
+    <div th:if="${errorMessage}" class="alert-toast-err">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${errorMessage}">An error occurred.</span>
+    </div>
+    <div th:if="${infoMessage}" class="alert-toast" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #93c5fd;">
+        <i class="fa-solid fa-circle-info"></i>
+        <span th:text="${infoMessage}">Information note.</span>
+    </div>
+</div>
+
+</body>
+</html>

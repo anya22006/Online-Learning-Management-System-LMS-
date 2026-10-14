@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${course.title} + ' | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('courses', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header(${course.title}, 'Course Details & Syllabus', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 24px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Overview & Syllabus -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-circle-info"></i> About this Course</h2>
+                    <span style="font-size: 12px; background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 4px 10px; border-radius: 6px; font-weight: 600;" th:text="${course.category}">Web Dev</span>
+                </div>
+                <p style="font-size: 14px; line-height: 1.7; color: #cbd5e1; margin-bottom: 24px;" th:text="${course.description}">Description</p>
+
+                <h3 style="font-size: 16px; margin-bottom: 12px; color: #fff;"><i class="fa-solid fa-list-check"></i> Course Syllabus</h3>
+                <pre style="background: #090d16; border: 1px solid var(--border-color); border-radius: 10px; padding: 18px; color: #cbd5e1; font-family: inherit; font-size: 13px; line-height: 1.6; white-space: pre-wrap;" th:text="${course.syllabus}">Syllabus</pre>
+            </div>
+
+            <!-- Lessons List -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-play-circle"></i> Course Lessons (<span th:text="${#lists.size(lessons)}">0</span>)</h2>
+                    <form th:unless="${isEnrolled}" th:action="@{/student/enroll}" method="POST" style="margin: 0;">
+                        <input type="hidden" name="courseId" th:value="${course.courseId}">
+                        <button type="submit" class="btn btn-primary" style="padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 13px;">
+                            <i class="fa-solid fa-user-plus"></i> Enroll Now
+                        </button>
+                    </form>
+                </div>
+
+                <div th:if="${#lists.isEmpty(lessons)}" style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                    No lessons uploaded for this course yet.
+                </div>
+
+                <div th:each="lesson : ${lessons}" style="background: #0f172a; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(99, 102, 241, 0.2); color: #818cf8; font-weight: 700; font-size: 14px;" th:text="${lesson.lessonOrder}">1</span>
+                        <div>
+                            <strong style="color: #fff; font-size: 14px;" th:text="${lesson.title}">Lesson Title</strong>
+                            <div style="font-size: 12px; color: var(--text-muted);">Interactive Learning Material</div>
+                        </div>
+                    </div>
+                    <div>
+                        <a th:if="${lesson.contentUrl != null}" th:href="${lesson.contentUrl}" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Resource
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

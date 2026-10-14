@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Assignments | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('assignments', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Course Assignments', 'Submit and track your coursework in SQLite', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div th:if="${#lists.isEmpty(assignments)}" style="padding: 50px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                No assignments currently available.
+            </div>
+
+            <div th:each="a : ${assignments}" style="background: #111827; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #fff;" th:text="${a.title}">Assignment Title</h3>
+                        <span style="font-size: 12px; color: var(--text-muted);" th:text="'Max Points: ' + ${a.maxScore} + ' pts'">100 pts</span>
+                    </div>
+                    <div>
+                        <span th:if="${submissionMap.containsKey(a.assignmentId)}" style="font-size: 12px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 6px 12px; border-radius: 8px; font-weight: 600;">
+                            <i class="fa-solid fa-circle-check"></i> Submitted
+                        </span>
+                        <span th:unless="${submissionMap.containsKey(a.assignmentId)}" style="font-size: 12px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 6px 12px; border-radius: 8px; font-weight: 600;">
+                            <i class="fa-regular fa-clock"></i> Pending Submission
+                        </span>
+                    </div>
+                </div>
+
+                <p style="font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 16px;" th:text="${a.instructions}">Instructions</p>
+
+                <!-- If already submitted -->
+                <div th:if="${submissionMap.containsKey(a.assignmentId)}" style="background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-top: 12px;">
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Your Submission:</div>
+                    <div style="font-size: 13px; color: #e2e8f0; white-space: pre-wrap;" th:text="${submissionMap.get(a.assignmentId).content}">Student submission text</div>
+
+                    <div th:if="${gradeMap.containsKey(a.assignmentId)}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 13px; font-weight: 700; color: #10b981;" th:text="'Grade: ' + ${gradeMap.get(a.assignmentId).score} + ' / ' + ${gradeMap.get(a.assignmentId).maxScore}">95 / 100</span>
+                            <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;" th:text="'Feedback: ' + ${gradeMap.get(a.assignmentId).feedback}">Feedback</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- If not submitted, render submission form -->
+                <div th:unless="${submissionMap.containsKey(a.assignmentId)}" style="margin-top: 16px;">
+                    <form th:action="@{/student/submit-assignment}" method="POST">
+                        <input type="hidden" name="assignmentId" th:value="${a.assignmentId}">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Your Solution / Code Link / Notes:</label>
+                            <textarea name="content" class="form-control" rows="3" placeholder="Enter your response, github repo link, or solution summary..." required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                            <i class="fa-solid fa-paper-plane"></i> Submit to Instructor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Quiz & Assignment | LMS Instructor')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('create-assignment', ${currentUser != null ? currentUser.role : 'INSTRUCTOR'})}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Assessments Builder', 'Create new assignments and interactive quizzes stored in SQLite', ${currentUser}, 'Instructor')}"></header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <!-- 1. Create Assignment Form -->
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-pen-to-square" style="color: var(--accent-amber);"></i> Create New Assignment</h2>
+                    </div>
+
+                    <form th:action="@{/instructor/create-assignment}" method="POST">
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Course</label>
+                            <select name="courseId" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                                <option th:each="c : ${courses}" th:value="${c.courseId}" th:text="${c.title}" th:selected="${c.courseId == selectedCourseId}">Course Title</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Assignment Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Build a Spring Boot REST API" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Instructions & Criteria</label>
+                            <textarea name="instructions" class="form-control" rows="4" placeholder="Detail the task, deliverables, and repo submission instructions..." required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;"></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Max Points</label>
+                            <input type="number" name="maxScore" value="100" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                            <i class="fa-solid fa-plus"></i> Save Assignment to SQLite
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. Create Quiz Form -->
+                <div class="card-section">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-brain" style="color: var(--accent-emerald);"></i> Create Interactive Quiz</h2>
+                    </div>
+
+                    <form th:action="@{/instructor/create-quiz}" method="POST">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Course</label>
+                            <select name="courseId" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                                <option th:each="c : ${courses}" th:value="${c.courseId}" th:text="${c.title}" th:selected="${c.courseId == selectedCourseId}">Course Title</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Quiz Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. SQLite & Database Systems Quiz" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Instructions</label>
+                            <input type="text" name="instructions" class="form-control" placeholder="Answer all multiple choice questions" value="Select the single correct answer. Instant automated scoring applies." style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Question 1</label>
+                            <input type="text" name="questionText" class="form-control" placeholder="e.g. What is the default port for HTTP?" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-size: 11px; color: var(--text-muted);">Option A</label>
+                                <input type="text" name="optionA" class="form-control" placeholder="Option A" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 12px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: var(--text-muted);">Option B</label>
+                                <input type="text" name="optionB" class="form-control" placeholder="Option B" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 12px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: var(--text-muted);">Option C</label>
+                                <input type="text" name="optionC" class="form-control" placeholder="Option C" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 12px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: var(--text-muted);">Option D</label>
+                                <input type="text" name="optionD" class="form-control" placeholder="Option D" style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 12px;">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Correct Option</label>
+                            <select name="correctOption" class="form-control" required style="width: 100%; background: #090d16; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: #fff; font-size: 13px;">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary" style="width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; background: #6366f1; color: #fff; border: none;">
+                            <i class="fa-solid fa-plus"></i> Save Quiz to SQLite
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

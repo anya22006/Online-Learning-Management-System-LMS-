@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Grades | LMS Platform')}"></head>
+<body>
+    <aside th:replace="~{fragments/layout :: sidebar('grades', 'STUDENT')}"></aside>
+
+    <div class="main-wrapper">
+        <header th:replace="~{fragments/layout :: header('Academic Performance & Grades', 'Graded assignments and quiz scores persisted in SQLite', ${currentUser}, 'Student')}"></header>
+
+        <div class="content-body" style="display: flex; flex-direction: column; gap: 28px;">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Assignment Grades -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-file-signature"></i> Assignment Grades & Instructor Feedback</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(assignmentGradeRows)}" style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                    No assignments submitted yet. Go to <a th:href="@{/student/my-assignments}" style="color: #6366f1;">Assignments</a> to submit work.
+                </div>
+
+                <table th:unless="${#lists.isEmpty(assignmentGradeRows)}" class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Submission Date</th>
+                            <th>Score</th>
+                            <th>Instructor Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row : ${assignmentGradeRows}">
+                            <td>
+                                <strong style="color: #fff;" th:text="${row.assignment != null ? row.assignment.title : 'Assignment #' + row.submission.assignmentId}">Title</strong>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 13px;" th:text="${row.submission.submittedAt}">Date</td>
+                            <td>
+                                <span th:if="${row.grade != null}" style="font-weight: 700; color: #10b981;" th:text="${row.grade.score} + ' / ' + ${row.grade.maxScore}">95 / 100</span>
+                                <span th:unless="${row.grade != null}" style="font-size: 12px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 4px 8px; border-radius: 4px;">Pending Review</span>
+                            </td>
+                            <td>
+                                <span th:if="${row.grade != null && row.grade.feedback != null}" style="font-size: 13px; color: #cbd5e1;" th:text="${row.grade.feedback}">Feedback</span>
+                                <span th:unless="${row.grade != null && row.grade.feedback != null}" style="color: var(--text-muted); font-size: 12px;">--</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Quiz Attempts -->
+            <div class="card-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-brain"></i> Quiz Results</h2>
+                </div>
+
+                <div th:if="${#lists.isEmpty(attempts)}" style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                    No quizzes completed yet.
+                </div>
+
+                <table th:unless="${#lists.isEmpty(attempts)}" class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Quiz Attempt</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Date Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="qa : ${attempts}">
+                            <td><strong style="color: #6366f1;">Quiz #<span th:text="${qa.quizId}">1</span></strong></td>
+                            <td th:text="${qa.score} + ' / ' + ${qa.totalMarks}">100 / 100</td>
+                            <td>
+                                <span style="font-weight: 700; color: #10b981;" th:text="${qa.percentage} + '%'">100%</span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 13px;" th:text="${qa.submittedAt}">Date</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
