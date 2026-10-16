@@ -1,0 +1,11 @@
+# Nixpacks configuration for Railway deployment
+# Detects OpenJDK 17 and Maven, packages the Spring Boot JAR, and executes it.
+
+[phases.setup]
+nixPkgs = ["openjdk17", "maven"]
+
+[phases.build]
+cmds = ["mvn clean package -DskipTests"]
+
+[start]
+cmd = "java -Dserver.port=$PORT -jar target/app.jar"
