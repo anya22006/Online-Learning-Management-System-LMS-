@@ -1,11 +1,11 @@
-const QUIZZES_API_URL = "http://localhost:8080/api/student/quizzes";
-const QUIZ_ATTEMPTS_API_URL = "http://localhost:8080/api/student/quiz-attempts";
+const QUIZZES_API_URL = "/api/student/quizzes";
+const QUIZ_ATTEMPTS_API_URL = "/api/student/quiz-attempts";
 let CURRENT_STUDENT = null;
 
 async function getAuthStudent() {
     if (CURRENT_STUDENT) return CURRENT_STUDENT;
     try {
-        const res = await fetch("http://localhost:8080/api/student/current");
+        const res = await fetch("/api/student/current");
         if (res.ok) {
             const data = await res.json();
             if (data && data.authenticated) {

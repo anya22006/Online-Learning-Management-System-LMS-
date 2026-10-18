@@ -2,7 +2,7 @@
 // ADMIN LMS JAVASCRIPT
 // ========================================
 
-const API_BASE = "http://localhost:8080/api/admin";
+const API_BASE = "/api/admin";
 
 document.addEventListener("DOMContentLoaded", () => {
     initAdminDashboard();
@@ -301,19 +301,25 @@ async function loadActivityLogs() {
 
     try {
         const res = await fetch(`${API_BASE}/activity-logs`);
-        if (!res.ok) return;
+        if (!res.ok) throw new Error("Status " + res.status);
         const logs = await res.json();
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 24px;">No activity logs recorded yet.</td></tr>`;
+            return;
+        }
 
         tbody.innerHTML = logs.map(log => `
             <tr>
-                <td>${new Date(log.timestamp).toLocaleString()}</td>
-                <td><strong>${escapeHtml(log.userName)}</strong></td>
-                <td><span class="badge badge-published" style="background:#4f46e5;">${escapeHtml(log.action)}</span></td>
-                <td>${escapeHtml(log.affectedResource)}</td>
+                <td>${log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}</td>
+                <td><strong>${escapeHtml(log.userName || 'System')}</strong></td>
+                <td><span class="badge badge-published" style="background:#4f46e5;">${escapeHtml(log.action || 'Activity')}</span></td>
+                <td>${escapeHtml(log.affectedResource || '')}</td>
             </tr>
         `).join("");
     } catch (err) {
         console.error("Error loading activity logs:", err);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 24px;">Failed to load activity logs.</td></tr>`;
     }
 }
 

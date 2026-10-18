@@ -1,4 +1,4 @@
-const INSTRUCTOR_PROFILE_URL = "http://localhost:8080/api/instructor/profile";
+const INSTRUCTOR_PROFILE_URL = "/api/instructor/profile";
 
 const profileForm = document.getElementById("instructorProfileForm");
 const profileMessage = document.getElementById("profileMessage");

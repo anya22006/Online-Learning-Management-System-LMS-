@@ -25,7 +25,7 @@ function displayProfile(profile) {
 
 async function loadProfile() {
     try {
-        const currentRes = await fetch("http://localhost:8080/api/student/current");
+        const currentRes = await fetch("/api/student/current");
         if (currentRes.ok) {
             const currentUser = await currentRes.json();
             if (currentUser && currentUser.id) {
@@ -37,7 +37,7 @@ async function loadProfile() {
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/api/student/profile/${currentStudentId}`);
+        const response = await fetch(`/api/student/profile/${currentStudentId}`);
         if (!response.ok) {
             throw new Error(`Could not load profile (HTTP ${response.status}).`);
         }
@@ -59,7 +59,7 @@ if (profileForm) {
         };
 
         try {
-            const response = await fetch(`http://localhost:8080/api/student/profile/${currentStudentId}`, {
+            const response = await fetch(`/api/student/profile/${currentStudentId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(request)

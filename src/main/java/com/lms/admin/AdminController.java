@@ -9,6 +9,8 @@ import com.lms.student.Enrollment;
 import com.lms.student.EnrollmentRepository;
 import com.lms.student.StudentProfile;
 import com.lms.student.StudentProfileRepository;
+import com.lms.user.User;
+import com.lms.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,6 +23,9 @@ import java.util.*;
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
 public class AdminController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private StudentProfileRepository studentProfileRepository;
@@ -60,15 +65,15 @@ public class AdminController {
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getAdminMetrics() {
         Map<String, Object> metrics = new HashMap<>();
-        long totalStudents = studentProfileRepository.count();
-        long totalInstructors = instructorProfileRepository.count();
+        long totalStudents = userRepository.countByRole("STUDENT");
+        long totalInstructors = userRepository.countByRole("INSTRUCTOR");
         long totalCourses = courseRepository.count();
         long publishedCourses = courseRepository.countByStatus(CourseStatus.PUBLISHED);
         long pendingCourses = courseRepository.countByStatus(CourseStatus.DRAFT);
         long totalEnrollments = enrollmentRepository.count();
 
-        metrics.put("totalStudents", totalStudents > 0 ? totalStudents : 1);
-        metrics.put("totalInstructors", totalInstructors > 0 ? totalInstructors : 1);
+        metrics.put("totalStudents", totalStudents);
+        metrics.put("totalInstructors", totalInstructors);
         metrics.put("totalCourses", totalCourses);
         metrics.put("publishedCourses", publishedCourses);
         metrics.put("pendingCourses", pendingCourses);
@@ -81,6 +86,13 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<List<AdminUserDto>> getAllUsers() {
         List<AdminUserDto> userList = new ArrayList<>();
+        List<User> users = userRepository.findAll();
+        if (!users.isEmpty()) {
+            for (User u : users) {
+                userList.add(new AdminUserDto(u.getId(), u.getFullName(), u.getEmail(), u.getRole(), u.getStatus()));
+            }
+            return ResponseEntity.ok(userList);
+        }
 
         // Add Students
         List<StudentProfile> students = studentProfileRepository.findAll();
@@ -94,35 +106,50 @@ public class AdminController {
             userList.add(new AdminUserDto(i.getId(), i.getName(), i.getEmail(), "INSTRUCTOR", i.getStatus()));
         }
 
-        // Add Default Admin if empty
-        userList.add(new AdminUserDto(999L, "System Administrator", "admin@lms.com", "ADMIN", "ACTIVE"));
-
         return ResponseEntity.ok(userList);
     }
 
     // Create User
     @PostMapping("/users")
     public ResponseEntity<AdminUserDto> createUser(@RequestBody Map<String, String> payload) {
-        String name = payload.getOrDefault("name", "New User");
-        String email = payload.getOrDefault("email", "user@lms.com");
-        String role = payload.getOrDefault("role", "STUDENT").toUpperCase();
-        String status = payload.getOrDefault("status", "ACTIVE");
+        String name = payload.getOrDefault("name", "New User").trim();
+        String email = payload.getOrDefault("email", "user@lms.com").trim();
+        String role = payload.getOrDefault("role", "STUDENT").toUpperCase().trim();
+        String status = payload.getOrDefault("status", "ACTIVE").trim();
+        String password = payload.getOrDefault("password", role.toLowerCase() + "123").trim();
 
-        AdminUserDto created;
-        if ("INSTRUCTOR".equals(role)) {
-            Long nextId = System.currentTimeMillis() % 10000;
-            InstructorProfile ip = new InstructorProfile(nextId, name, email, "Computer Science", "Instructor", status);
-            instructorProfileRepository.save(ip);
-            created = new AdminUserDto(ip.getId(), ip.getName(), ip.getEmail(), "INSTRUCTOR", ip.getStatus());
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
+        User user;
+        if (existing.isPresent()) {
+            user = existing.get();
+            user.setFullName(name);
+            user.setRole(role);
+            user.setStatus(status);
+            user = userRepository.save(user);
         } else {
-            Long nextId = System.currentTimeMillis() % 10000;
-            StudentProfile sp = new StudentProfile(nextId, name, email, "Student", status);
-            studentProfileRepository.save(sp);
-            created = new AdminUserDto(sp.getId(), sp.getName(), sp.getEmail(), "STUDENT", sp.getStatus());
+            user = new User(email, password, name, role, "General");
+            user.setStatus(status);
+            user = userRepository.save(user);
         }
 
-        activityLogRepository.save(new ActivityLog("Admin", "Created User Account", "User #" + created.getId() + " (" + role + ")"));
-        return ResponseEntity.ok(created);
+        if ("INSTRUCTOR".equals(role)) {
+            InstructorProfile ip = instructorProfileRepository.findById(user.getId())
+                    .orElse(new InstructorProfile(user.getId(), name, email, "General", "Instructor", status));
+            ip.setName(name);
+            ip.setEmail(email);
+            ip.setStatus(status);
+            instructorProfileRepository.save(ip);
+        } else if ("STUDENT".equals(role)) {
+            StudentProfile sp = studentProfileRepository.findById(user.getId())
+                    .orElse(new StudentProfile(user.getId(), name, email, "Student", status));
+            sp.setName(name);
+            sp.setEmail(email);
+            sp.setStatus(status);
+            studentProfileRepository.save(sp);
+        }
+
+        activityLogRepository.save(new ActivityLog("Admin", "Created User Account", user.getFullName() + " (" + role + ")"));
+        return ResponseEntity.ok(new AdminUserDto(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getStatus()));
     }
 
     // Update User
@@ -132,35 +159,36 @@ public class AdminController {
         String email = payload.get("email");
         String status = payload.get("status");
 
+        userRepository.findById(id).ifPresent(user -> {
+            if (name != null) user.setFullName(name);
+            if (email != null) user.setEmail(email);
+            if (status != null) user.setStatus(status);
+            userRepository.save(user);
+        });
+
         if ("INSTRUCTOR".equalsIgnoreCase(role)) {
-            Optional<InstructorProfile> opt = instructorProfileRepository.findById(id);
-            if (opt.isPresent()) {
-                InstructorProfile ip = opt.get();
+            instructorProfileRepository.findById(id).ifPresent(ip -> {
                 if (name != null) ip.setName(name);
                 if (email != null) ip.setEmail(email);
                 if (status != null) ip.setStatus(status);
                 instructorProfileRepository.save(ip);
-                activityLogRepository.save(new ActivityLog("Admin", "Updated Instructor", ip.getName()));
-                return ResponseEntity.ok(ip);
-            }
-        } else {
-            Optional<StudentProfile> opt = studentProfileRepository.findById(id);
-            if (opt.isPresent()) {
-                StudentProfile sp = opt.get();
+            });
+        } else if ("STUDENT".equalsIgnoreCase(role)) {
+            studentProfileRepository.findById(id).ifPresent(sp -> {
                 if (name != null) sp.setName(name);
                 if (email != null) sp.setEmail(email);
                 if (status != null) sp.setStatus(status);
                 studentProfileRepository.save(sp);
-                activityLogRepository.save(new ActivityLog("Admin", "Updated Student", sp.getName()));
-                return ResponseEntity.ok(sp);
-            }
+            });
         }
-        return ResponseEntity.notFound().build();
+        activityLogRepository.save(new ActivityLog("Admin", "Updated User", name != null ? name : "User #" + id));
+        return ResponseEntity.ok(Map.of("message", "User updated successfully"));
     }
 
     // Delete User
     @DeleteMapping("/users/{role}/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String role, @PathVariable Long id) {
+        userRepository.deleteById(id);
         if ("INSTRUCTOR".equalsIgnoreCase(role)) {
             instructorProfileRepository.deleteById(id);
         } else {
@@ -185,9 +213,14 @@ public class AdminController {
             item.put("instructorId", c.getInstructorId());
             item.put("createdAt", c.getCreatedAt());
 
-            // Instructor name
-            Optional<InstructorProfile> instOpt = instructorProfileRepository.findById(c.getInstructorId());
-            item.put("instructorName", instOpt.map(InstructorProfile::getName).orElse("Instructor #" + c.getInstructorId()));
+            // Instructor name (handle null instructorId safely)
+            String instructorName = "Unassigned";
+            if (c.getInstructorId() != null) {
+                instructorName = instructorProfileRepository.findById(c.getInstructorId())
+                        .map(InstructorProfile::getName)
+                        .orElse("Instructor #" + c.getInstructorId());
+            }
+            item.put("instructorName", instructorName);
 
             // Enrollment count
             long enrollCount = enrollmentRepository.countByCourseId(c.getCourseId());

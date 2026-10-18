@@ -1,11 +1,11 @@
-const ASSIGNMENTS_API_URL = "http://localhost:8080/api/student/assignments";
-const SUBMISSIONS_API_URL = "http://localhost:8080/api/student/submissions";
+const ASSIGNMENTS_API_URL = "/api/student/assignments";
+const SUBMISSIONS_API_URL = "/api/student/submissions";
 let CURRENT_STUDENT = null;
 
 async function getAuthStudent() {
     if (CURRENT_STUDENT) return CURRENT_STUDENT;
     try {
-        const res = await fetch("http://localhost:8080/api/student/current");
+        const res = await fetch("/api/student/current");
         if (res.ok) {
             const data = await res.json();
             if (data && data.authenticated) {

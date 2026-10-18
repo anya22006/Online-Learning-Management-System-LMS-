@@ -2,7 +2,7 @@
 // STUDENT LMS JAVASCRIPT
 // ========================================
 
-const API_BASE_URL = "http://localhost:8080/api/student";
+const API_BASE_URL = "/api/student";
 
 let CURRENT_STUDENT = null;
 
